@@ -1,4 +1,5 @@
 # stenciler
+
  Software repository template manager
 
 The development environment is in a [dev container](https://containers.dev). The container is preconfigured with aliases
@@ -8,7 +9,7 @@ be used in [GitHub Codespaces](https://docs.github.com/en/codespaces).
 ## Building
 
 ```shell
-docker compose build
+gob
 ```
 
 ## Linting

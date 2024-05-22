@@ -24,4 +24,4 @@ RUN go install github.com/spf13/cobra-cli@v1.3.0
 
 # configure user environment
 WORKDIR /home/vscode
-ADD userhome/ .
+ADD --chown=vscode:vscode userhome/ .
