@@ -19,6 +19,9 @@ RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/i
 # install mockery
 RUN go install github.com/vektra/mockery/v2@v2.43.1
 
+# install cobra-cli
+RUN go install github.com/spf13/cobra-cli@v1.3.0
+
 # configure user environment
 WORKDIR /home/vscode
 ADD userhome/ .
