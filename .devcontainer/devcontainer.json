@@ -1,0 +1,31 @@
+{
+	"name": "Stenciler Development",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
+	},
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "zsh",
+				"terminal.integrated.profiles.linux": {
+					"zsh": {
+						"path": "/bin/zsh"
+					}
+				}
+			},
+			"extensions": [
+				"ms-azuretools.vscode-docker",
+				"joselitofilho.ginkgotestexplorer",
+				"github.vscode-github-actions",
+				"github.vscode-pull-request-github",
+				"golang.go",
+				"yzhang.markdown-all-in-one",
+				"davidanson.vscode-markdownlint",
+				"bmalehorn.shell-syntax"
+			]
+		}
+	}
+}
