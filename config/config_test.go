@@ -73,4 +73,138 @@ templates:
 			})
 		})
 	})
+
+	Describe("Write", func() {
+		var (
+			cfg *config.Config
+
+			writer *strings.Builder
+			err    error
+
+			expected string
+			actual   string
+		)
+
+		BeforeEach(func() {
+			writer = &strings.Builder{}
+		})
+
+		JustBeforeEach(func() {
+			err = cfg.Write(writer)
+			actual = writer.String()
+		})
+
+		Context("with empty config", func() {
+			BeforeEach(func() {
+				cfg = &config.Config{}
+				expected = ""
+			})
+
+			It("should not error", func() {
+				Expect(err).To(MatchError("unable to write empty config"))
+			})
+
+			It("should return an empty config", func() {
+				Expect(actual).To(Equal(expected))
+			})
+		})
+
+		Context("with simple config", func() {
+			BeforeEach(func() {
+				cfg = &config.Config{
+					Templates: []config.Template{
+						{
+							Repository: "https://github.com/rogueserenity/stenciler-test",
+							Directory:  "test",
+						},
+					},
+				}
+				expected = `templates:
+    - repository: https://github.com/rogueserenity/stenciler-test
+      directory: test
+`
+			})
+
+			It("should not error", func() {
+				Expect(err).ToNot(HaveOccurred())
+			})
+
+			It("should return an empty config", func() {
+				Expect(actual).To(Equal(expected))
+			})
+		})
+
+		Context("with full config", func() {
+			BeforeEach(func() {
+				cfg = &config.Config{
+					Templates: []config.Template{
+						{
+							Repository: "https://github.com/rogueserenity/stenciler-test",
+							Directory:  "test",
+							Params: []config.Param{
+								{
+									Name:           "spoo",
+									Prompt:         "Would you like spoo?",
+									Default:        "false",
+									ValidationHook: "hooks/spoo.sh",
+									Value:          "true",
+								},
+							},
+							InitOnlyPaths: []string{
+								"go.mod",
+								"go.sum",
+							},
+							RawCopyPaths: []string{
+								"**/*.py",
+							},
+							PreInitHookPaths: []string{
+								"hooks/preinit",
+							},
+							PostInitHookPaths: []string{
+								"hooks/postinit",
+							},
+							PreUpdateHookPaths: []string{
+								"hooks/preup",
+							},
+							PostUpdateHookPaths: []string{
+								"hooks/postup",
+							},
+						},
+					},
+				}
+				expected = `templates:
+    - repository: https://github.com/rogueserenity/stenciler-test
+      directory: test
+      params:
+        - name: spoo
+          prompt: Would you like spoo?
+          default: "false"
+          validation-hook: hooks/spoo.sh
+          value: "true"
+      init-only:
+        - go.mod
+        - go.sum
+      raw-copy:
+        - '**/*.py'
+      pre-init-hooks:
+        - hooks/preinit
+      post-init-hooks:
+        - hooks/postinit
+      pre-update-hooks:
+        - hooks/preup
+      post-update-hooks:
+        - hooks/postup
+`
+			})
+
+			It("should not error", func() {
+				Expect(err).ToNot(HaveOccurred())
+			})
+
+			It("should return an empty config", func() {
+				Expect(actual).To(Equal(expected))
+			})
+		})
+	})
+
 })
