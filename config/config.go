@@ -23,6 +23,7 @@ type Param struct {
 // relative to directory. The directory and hook paths are all relative to the repository root.
 type Template struct {
 	Repository string `yaml:"repository"`
+	SHA        string `yaml:"commit-sha,omitempty"`
 	Directory  string `yaml:"directory"`
 
 	Params []Param `yaml:"params,omitempty"`
