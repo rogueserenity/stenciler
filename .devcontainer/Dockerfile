@@ -10,7 +10,7 @@ RUN curl -SsL https://packages.httpie.io/deb/KEY.gpg |\
 USER vscode:vscode
 
 # install ginkgo
-RUN go install github.com/onsi/ginkgo/v2/ginkgo@v2.17.3
+RUN go install github.com/onsi/ginkgo/v2/ginkgo@v2.19.0
 
 # install golangci-lint
 RUN curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh |\

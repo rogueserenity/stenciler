@@ -19,6 +19,7 @@
 			"extensions": [
 				"ms-azuretools.vscode-docker",
 				"joselitofilho.ginkgotestexplorer",
+				"github.copilot",
 				"github.vscode-github-actions",
 				"github.vscode-pull-request-github",
 				"golang.go",
