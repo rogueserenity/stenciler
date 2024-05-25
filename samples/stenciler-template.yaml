@@ -1,0 +1,28 @@
+templates:
+-
+  repository: repo url #not valid in template
+  directory: root/of/template #relative to repo root
+  params:
+    - name: eat-spoo
+      prompt: "Will you be eating spoo?" #if prompt not provided, then considered an internal variable
+      default: "true"
+      validation-hook: path/to/validator #relative to repo root
+      value: "false" # valid in templates if prompt omitted, always valid in local
+    - name: eat-flarn
+      value: "false"
+  init-only: # list of file globs that are only copied during an init and ignored during updates
+    - "**/*.go" # relative to directory
+    - go.mod
+    - go.sum
+    - README.md
+  raw-copy: # list of file globs that are not run through the template engine
+    - .gitignore #relative to directory
+  pre-init-hooks:
+    - path/to/hook #relative to repo root
+    - path/to/hook2
+  post-init-hooks:
+    - path/to/hook #relative to repo root
+  pre-update-hooks:
+    - path/to/hook #relative to repo root
+  post-update-hooks:
+    - path/to/hook #relative to repo root
