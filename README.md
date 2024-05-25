@@ -51,3 +51,47 @@ gou
 
 ```shell
 ```
+
+## NOTES
+
+Use [doublestar](https://github.com/bmatcuk/doublestar) for globbing
+
+## PLANS
+
+### init
+
+```pseudo
+if repo template dir not supplied, check out repo into temp dir
+read template config
+if more than one, prompt user to select
+validate that every hook file exists for template, exit with error if one missing
+run through prompts for the template, building local config
+  run hooks on inputs as values are entered
+write local config
+run pre-init hooks in order
+copy over all raw copy files
+copy over all templated files, processing templates as we go
+run post-init hooks in order
+```
+
+### update
+
+```pseudo
+if repo template dir not supplied, check out repo into temp dir
+read local template config
+check git repo sha to see if different from local, if same, exit with message but no error
+validate that every hook file exists for template, exit with error if one missing
+run pre-update hooks in order
+copy over all raw copy files, exclude init-only
+copy over all templated files, processing templates as we go, exclude init-only
+run post-update hooks in order
+```
+
+### check
+
+```pseudo
+if repo template dir not supplied, check out repo into temp dir
+read local template config
+check git repo sha to see if different from local, if same, exit with message but no error
+if different exit with error code and message
+```
