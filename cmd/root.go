@@ -5,16 +5,14 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-
-	"github.com/rogueserenity/stenciler/config"
 )
 
-const defaultConfigFile = ".stenciler.yaml"
+const configFileName = ".stenciler.yaml"
 
 // persistent flags
 var (
-	configFile string
-	repoDir    string
+	repoDir   string
+	authToken string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -26,11 +24,11 @@ that repo up to date with changes from the repository`,
 
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		if len(repoDir) > 0 {
-			fi, err := os.Stat(repoDir)
+			info, err := os.Stat(repoDir)
 			if err != nil {
 				return err
 			}
-			if !fi.IsDir() {
+			if !info.IsDir() {
 				return fmt.Errorf("%s exists but is not a directory", repoDir)
 			}
 		}
@@ -48,15 +46,6 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&configFile, "config", "", "alternate config file (default is .stenciler.yaml)")
-	rootCmd.PersistentFlags().StringVarP(&repoDir, "template-repo-dir", "t", "", "local template repository directory")
-}
-
-func loadConfig() (*config.Config, error) {
-	cfgFile := defaultConfigFile
-	if len(configFile) > 0 {
-		cfgFile = configFile
-	}
-
-	return config.ReadFromFile(cfgFile)
+	rootCmd.PersistentFlags().StringVarP(&repoDir, "template-repo-dir", "r", "", "local template repository directory")
+	rootCmd.PersistentFlags().StringVarP(&authToken, "auth-token", "t", "", "authentication token for private repositories")
 }

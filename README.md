@@ -64,7 +64,7 @@ Use [doublestar](https://github.com/bmatcuk/doublestar) for globbing
 if repo template dir not supplied, check out repo into temp dir
 read template config
 if more than one, prompt user to select
-validate that every hook file exists for template, exit with error if one missing
+validate that every hook file exists for template, exit with error if any missing or not executable
 run through prompts for the template, building local config
   run hooks on inputs as values are entered
 write local config
@@ -80,7 +80,7 @@ run post-init hooks in order
 if repo template dir not supplied, check out repo into temp dir
 read local template config
 check git repo sha to see if different from local, if same, exit with message but no error
-validate that every hook file exists for template, exit with error if one missing
+validate that every hook file exists for template, exit with error if any missing or not executable
 run pre-update hooks in order
 copy over all raw copy files, exclude init-only
 copy over all templated files, processing templates as we go, exclude init-only
