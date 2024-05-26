@@ -30,36 +30,43 @@ The proper order of setting up a new repository is:
 		if err != nil {
 			cobra.CheckErr("repoURL must be a valid URL")
 		}
+		doInit(url)
+	},
+}
 
-		if len(repoDir) == 0 {
-			repoDir, err = git.Clone(url.String(), authToken)
-			if err != nil {
-				cobra.CheckErr(err)
-			}
-			defer os.RemoveAll(repoDir)
-			fmt.Printf("cloned %s to %s\n", url, repoDir)
-		}
+func init() {
+	rootCmd.AddCommand(initCmd)
+}
 
-		cfgFile := filepath.Join(repoDir, configFileName)
-		cfg, err := config.ReadFromFile(cfgFile)
+func doInit(repoURL *url.URL) {
+	if len(repoDir) == 0 {
+		repoDir, err := git.Clone(repoURL.String(), authToken)
 		if err != nil {
 			cobra.CheckErr(err)
 		}
+		defer os.RemoveAll(repoDir)
+		fmt.Printf("cloned %s to %s\n", repoURL, repoDir)
+	}
 
-		if len(cfg.Templates) == 0 {
-			cobra.CheckErr("no templates found in config file")
-		}
+	cfgFile := filepath.Join(repoDir, configFileName)
+	cfg, err := config.ReadFromFile(cfgFile)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
 
-		localConfig := &config.Config{}
+	if len(cfg.Templates) == 0 {
+		cobra.CheckErr("no templates found in config file")
+	}
 
-		if len(cfg.Templates) > 1 {
-			localConfig.Templates = append(localConfig.Templates, selectTemplate(cfg, cfgFile))
-		} else {
-			localConfig.Templates = cfg.Templates
-		}
+	localConfig := &config.Config{}
 
-		fmt.Println("init called with", url)
-	},
+	if len(cfg.Templates) == 1 {
+		localConfig.Templates = cfg.Templates
+	} else {
+		localConfig.Templates = append(localConfig.Templates, selectTemplate(cfg, cfgFile))
+	}
+
+	fmt.Println("init called with", repoURL)
 }
 
 func selectTemplate(cfg *config.Config, cfgFile string) config.Template {
@@ -84,8 +91,4 @@ func selectTemplate(cfg *config.Config, cfgFile string) config.Template {
 		}
 	}
 	return *template
-}
-
-func init() {
-	rootCmd.AddCommand(initCmd)
 }
