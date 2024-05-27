@@ -88,12 +88,12 @@ func doInit(repoURL *url.URL) {
 		cobra.CheckErr(err)
 	}
 
-	err = files.CopyRaw(template)
+	err = files.CopyRaw(repoDir, template)
 	if err != nil {
 		cobra.CheckErr(err)
 	}
 
-	err = files.CopyTemplated(template, false)
+	err = files.CopyTemplated(repoDir, template, false)
 	if err != nil {
 		cobra.CheckErr(err)
 	}

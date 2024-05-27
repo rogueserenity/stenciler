@@ -2,6 +2,7 @@ package files
 
 import "github.com/rogueserenity/stenciler/config"
 
-func CopyRaw(template *config.Template) error {
+// CopyRaw copies files that do not require template processing into the current working directory.
+func CopyRaw(repoDir string, template *config.Template) error {
 	return nil
 }

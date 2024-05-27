@@ -6,6 +6,9 @@ import (
 	"path/filepath"
 )
 
+// ExecuteValidationHook executes a validation hook with the given name and value. It expects the hook to return an
+// updated value written to standard out for the given parameter. No other output should be present on stdout. Standard
+// error content is ignored.
 func ExecuteValidationHook(hook, name, value string) (string, error) {
 	out, err := exec.Command("/bin/sh", hook, name, value).Output()
 	if err != nil {
@@ -14,6 +17,8 @@ func ExecuteValidationHook(hook, name, value string) (string, error) {
 	return string(out), nil
 }
 
+// ExecuteHooks executes each of the pre/post hooks in the order they were listed. If a hook exits with a non-zero exit
+// code, all execution with stop and an error will be returned
 func ExecuteHooks(repoDir string, hooks []string) error {
 	for _, hook := range hooks {
 		if err := executeHook(filepath.Join(repoDir, hook)); err != nil {

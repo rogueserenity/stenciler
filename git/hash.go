@@ -6,6 +6,8 @@ import (
 	"github.com/go-git/go-git/v5"
 )
 
+// CommitHash returns the git commit hash of the HEAD of repository located at the provided path. Returns an error if
+// it cannot locate a git repository or the path or cannot find the HEAD of the repository.
 func CommitHash(path string) (string, error) {
 	repo, err := git.PlainOpen(path)
 	if err != nil {
