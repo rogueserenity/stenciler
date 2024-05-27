@@ -11,7 +11,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/rogueserenity/stenciler/config"
+	"github.com/rogueserenity/stenciler/files"
 	"github.com/rogueserenity/stenciler/git"
+	"github.com/rogueserenity/stenciler/hooks"
 )
 
 // Command represents the init command
@@ -39,6 +41,8 @@ func init() {
 }
 
 func doInit(repoURL *url.URL) {
+	fmt.Println("init called with", repoURL)
+
 	if len(repoDir) == 0 {
 		repoDir, err := git.Clone(repoURL.String(), authToken)
 		if err != nil {
@@ -65,8 +69,39 @@ func doInit(repoURL *url.URL) {
 	} else {
 		localConfig.Templates = append(localConfig.Templates, selectTemplate(cfg, cfgFile))
 	}
+	template := &localConfig.Templates[0]
 
-	fmt.Println("init called with", repoURL)
+	err = hooks.Validate(template, repoDir)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+
+	prompt(template)
+
+	err = localConfig.WriteToFile(configFileName)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+
+	err = hooks.ExecuteHooks(template.PreInitHookPaths)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+
+	err = files.CopyRaw(template)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+
+	err = files.CopyTemplated(template, false)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+
+	err = hooks.ExecuteHooks(template.PostInitHookPaths)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
 }
 
 func selectTemplate(cfg *config.Config, cfgFile string) config.Template {
@@ -91,4 +126,36 @@ func selectTemplate(cfg *config.Config, cfgFile string) config.Template {
 		}
 	}
 	return *template
+}
+
+func prompt(template *config.Template) {
+	reader := bufio.NewReader(os.Stdin)
+
+	for _, p := range template.Params {
+		if len(p.Prompt) == 0 {
+			continue
+		}
+		fmt.Print(p.Prompt)
+		if len(p.Default) > 0 {
+			fmt.Printf(" [%s]", p.Default)
+		}
+		fmt.Print(": ")
+		value, err := reader.ReadString('\n')
+		if err != nil {
+			cobra.CheckErr(err)
+		}
+		value = strings.TrimSpace(value)
+		if len(value) == 0 {
+			value = p.Default
+		}
+
+		if len(p.ValidationHook) > 0 {
+			value, err = hooks.ExecuteValidationHook(filepath.Join(repoDir, p.ValidationHook), p.Name, value)
+			if err != nil {
+				cobra.CheckErr(err)
+			}
+		}
+
+		p.Value = value
+	}
 }
