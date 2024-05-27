@@ -16,7 +16,7 @@ import (
 	"github.com/rogueserenity/stenciler/hooks"
 )
 
-// Command represents the init command
+// Command represents the init command.
 var initCmd = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Use:   "init [repoURL]",
@@ -27,7 +27,7 @@ The proper order of setting up a new repository is:
 1. Create the repository with git
 2. Intialize the repository with stenciler`,
 
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, args []string) {
 		url, err := url.Parse(args[0])
 		if err != nil {
 			cobra.CheckErr("repoURL must be a valid URL")
@@ -78,34 +78,17 @@ func doInit(repoURL *url.URL) {
 
 	prompt(template)
 
-	err = localConfig.WriteToFile(configFileName)
-	if err != nil {
-		cobra.CheckErr(err)
-	}
-
-	err = hooks.ExecuteHooks(repoDir, template.PreInitHookPaths)
-	if err != nil {
-		cobra.CheckErr(err)
-	}
-
-	err = files.CopyRaw(repoDir, template)
-	if err != nil {
-		cobra.CheckErr(err)
-	}
-
-	err = files.CopyTemplated(repoDir, template, false)
-	if err != nil {
-		cobra.CheckErr(err)
-	}
-
-	err = hooks.ExecuteHooks(repoDir, template.PostInitHookPaths)
-	if err != nil {
-		cobra.CheckErr(err)
-	}
+	initialWrite(localConfig)
 }
 
 func selectTemplate(cfg *config.Config, cfgFile string) config.Template {
 	fmt.Printf("found %d templates in config file: %s\n", len(cfg.Templates), cfgFile)
+
+	var templateMap = make(map[string]config.Template)
+	for _, t := range cfg.Templates {
+		templateMap[t.Directory] = t
+	}
+
 	var template *config.Template
 	for template == nil {
 		for _, t := range cfg.Templates {
@@ -118,11 +101,8 @@ func selectTemplate(cfg *config.Config, cfgFile string) config.Template {
 			cobra.CheckErr(err)
 		}
 		d = strings.TrimSpace(d)
-		for _, t := range cfg.Templates {
-			if t.Directory == d {
-				template = &t
-				break
-			}
+		if t, ok := templateMap[d]; ok {
+			template = &t
 		}
 	}
 	return *template
@@ -157,5 +137,34 @@ func prompt(template *config.Template) {
 		}
 
 		p.Value = value
+	}
+}
+
+func initialWrite(localConfig *config.Config) {
+	err := localConfig.WriteToFile(configFileName)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+
+	template := &localConfig.Templates[0]
+
+	err = hooks.ExecuteHooks(repoDir, template.PreInitHookPaths)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+
+	err = files.CopyRaw(repoDir, template)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+
+	err = files.CopyTemplated(repoDir, template, false)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+
+	err = hooks.ExecuteHooks(repoDir, template.PostInitHookPaths)
+	if err != nil {
+		cobra.CheckErr(err)
 	}
 }

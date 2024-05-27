@@ -9,20 +9,20 @@ import (
 
 const configFileName = ".stenciler.yaml"
 
-// persistent flags
+// Persistent flags.
 var (
 	repoDir   string
 	authToken string
 )
 
-// rootCmd represents the base command when called without any subcommands
+// rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
 	Use:   "stenciler",
 	Short: "repository templates made easy",
 	Long: `stenciler supports both initial templating of a repository and keeping
 that repo up to date with changes from the repository`,
 
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+	PersistentPreRunE: func(_ *cobra.Command, _ []string) error {
 		if len(repoDir) > 0 {
 			info, err := os.Stat(repoDir)
 			if err != nil {
@@ -47,5 +47,10 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&repoDir, "template-repo-dir", "r", "", "local template repository directory")
-	rootCmd.PersistentFlags().StringVarP(&authToken, "auth-token", "t", "", "authentication token for private repositories")
+	rootCmd.PersistentFlags().StringVarP(
+		&authToken,
+		"auth-token",
+		"t",
+		"",
+		"authentication token for private repositories")
 }

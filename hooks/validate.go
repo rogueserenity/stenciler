@@ -9,7 +9,7 @@ import (
 	"github.com/rogueserenity/stenciler/config"
 )
 
-// Validate validates all the hooks in the template exist and are executable
+// Validate validates all the hooks in the template exist and are executable.
 func Validate(template *config.Template, repoPath string) error {
 	var errs []error
 	hookPaths := gatherHookPaths(template)

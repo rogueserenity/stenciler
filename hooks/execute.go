@@ -18,7 +18,7 @@ func ExecuteValidationHook(hook, name, value string) (string, error) {
 }
 
 // ExecuteHooks executes each of the pre/post hooks in the order they were listed. If a hook exits with a non-zero exit
-// code, all execution with stop and an error will be returned
+// code, all execution with stop and an error will be returned.
 func ExecuteHooks(repoDir string, hooks []string) error {
 	for _, hook := range hooks {
 		if err := executeHook(filepath.Join(repoDir, hook)); err != nil {
