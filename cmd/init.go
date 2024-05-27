@@ -83,7 +83,7 @@ func doInit(repoURL *url.URL) {
 		cobra.CheckErr(err)
 	}
 
-	err = hooks.ExecuteHooks(template.PreInitHookPaths)
+	err = hooks.ExecuteHooks(repoDir, template.PreInitHookPaths)
 	if err != nil {
 		cobra.CheckErr(err)
 	}
@@ -98,7 +98,7 @@ func doInit(repoURL *url.URL) {
 		cobra.CheckErr(err)
 	}
 
-	err = hooks.ExecuteHooks(template.PostInitHookPaths)
+	err = hooks.ExecuteHooks(repoDir, template.PostInitHookPaths)
 	if err != nil {
 		cobra.CheckErr(err)
 	}
