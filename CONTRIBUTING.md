@@ -12,9 +12,7 @@ gob
 
 ## Linting
 
-[golangci-lint](https://golangci-lint.run/) is used for linting. The default configuration is preferred, but if there
-are specific exceptiions that are required, the configuration manual can be found
-[here](https://golangci-lint.run/usage/configuration/). In order to run the linting, run:
+[golangci-lint](https://golangci-lint.run/) is used for linting. In order to run the linting, run:
 
 ```shell
 gol
