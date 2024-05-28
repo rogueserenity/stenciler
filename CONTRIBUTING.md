@@ -4,6 +4,12 @@ The development environment is in a [dev container](https://containers.dev). The
 for running common commands. This also allows all developers to share a common environment and allows the environment to
 be used in [GitHub Codespaces](https://docs.github.com/en/codespaces).
 
+## Commiting
+
+All commit messages should meet the requirements of [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+A [VS Code plugin](https://marketplace.visualstudio.com/items?itemName=vivaxy.vscode-conventional-commits) is included
+in the Dev Container to make it easier to complete this action.
+
 ## Building
 
 ```shell
