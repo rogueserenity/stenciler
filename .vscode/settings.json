@@ -1,6 +1,7 @@
 {
   "conventionalCommits.scopes": [
     "devcontainer",
-    "goreleaser"
+    "goreleaser",
+    "rawcopy"
   ]
 }
