@@ -2,6 +2,7 @@
   "conventionalCommits.scopes": [
     "devcontainer",
     "goreleaser",
-    "rawcopy"
+    "rawcopy",
+    "init"
   ]
 }

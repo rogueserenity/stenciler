@@ -46,11 +46,20 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&repoDir, "template-repo-dir", "r", "", "local template repository directory")
+	rootCmd.PersistentFlags().StringVarP(&repoDir,
+		"template-repo-dir",
+		"r",
+		"",
+		"local directory to use as the template repository",
+	)
+
 	rootCmd.PersistentFlags().StringVarP(
 		&authToken,
 		"auth-token",
 		"t",
 		"",
-		"authentication token for private repositories")
+		"authentication token for private remote repositories",
+	)
+
+	rootCmd.MarkFlagsMutuallyExclusive("template-repo-dir", "auth-token")
 }

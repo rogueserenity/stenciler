@@ -10,7 +10,7 @@ import (
 )
 
 // Validate validates all the hooks in the template exist and are executable.
-func Validate(template *config.Template, repoPath string) error {
+func Validate(template config.Template, repoPath string) error {
 	var errs []error
 	hookPaths := gatherHookPaths(template)
 	for _, hookPath := range hookPaths {
@@ -25,7 +25,7 @@ func Validate(template *config.Template, repoPath string) error {
 	return nil
 }
 
-func gatherHookPaths(template *config.Template) []string {
+func gatherHookPaths(template config.Template) []string {
 	var hookPaths []string
 
 	for _, param := range template.Params {
