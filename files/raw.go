@@ -2,6 +2,7 @@ package files
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -44,5 +45,8 @@ func generateRawCopyList(srcRootPath string, rawCopyPaths []string) ([]string, e
 		}
 		copyList = append(copyList, rawFiles...)
 	}
+
+	slog.Debug("copy list", slog.Any("files", copyList))
+
 	return copyList, nil
 }

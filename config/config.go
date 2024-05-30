@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"io"
+	"log/slog"
 	"os"
 
 	"gopkg.in/yaml.v3"
@@ -115,4 +116,35 @@ func (c *Config) Write(out io.Writer) error {
 	}
 	_, err = out.Write(b)
 	return err
+}
+
+// LogValue returns the slog.Value representation of the Config.
+func (c *Config) LogValue() slog.Value {
+	return slog.AnyValue(c.Templates)
+}
+
+// LogValue returns the slog.Value representation of the Template.
+func (t *Template) LogValue() slog.Value {
+	return slog.GroupValue(
+		slog.String("repository", t.Repository),
+		slog.String("directory", t.Directory),
+		slog.Any("params", t.Params),
+		slog.Any("init-only", t.InitOnlyPaths),
+		slog.Any("raw-copy", t.RawCopyPaths),
+		slog.Any("pre-init-hooks", t.PreInitHookPaths),
+		slog.Any("post-init-hooks", t.PostInitHookPaths),
+		slog.Any("pre-update-hooks", t.PreUpdateHookPaths),
+		slog.Any("post-update-hooks", t.PostUpdateHookPaths),
+	)
+}
+
+// LogValue returns the slog.Value representation of the Param.
+func (p *Param) LogValue() slog.Value {
+	return slog.GroupValue(
+		slog.String("name", p.Name),
+		slog.String("prompt", p.Prompt),
+		slog.String("default", p.Default),
+		slog.String("validation-hook", p.ValidationHook),
+		slog.String("value", p.Value),
+	)
 }

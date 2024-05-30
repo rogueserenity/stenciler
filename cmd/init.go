@@ -3,6 +3,7 @@ package cmd
 import (
 	"bufio"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -43,20 +44,33 @@ func init() {
 func doInit(repoURL *url.URL) {
 	fmt.Println("init called with", repoURL)
 
+	var err error
 	if len(repoDir) == 0 {
-		repoDir, err := git.Clone(repoURL.String(), authToken)
+		repoDir, err = git.Clone(repoURL.String(), authToken)
 		if err != nil {
 			cobra.CheckErr(err)
 		}
 		defer os.RemoveAll(repoDir)
-		fmt.Printf("cloned %s to %s\n", repoURL, repoDir)
+		slog.Debug("cloned repository",
+			slog.String("repoURL", repoURL.String()),
+			slog.String("repoDir", repoDir),
+		)
 	}
 
 	cfgFile := filepath.Join(repoDir, configFileName)
+	slog.Debug("config file path",
+		slog.String("cfgFile", cfgFile),
+		slog.String("repoDir", repoDir),
+		slog.String("configFileName", configFileName),
+	)
 	cfg, err := config.ReadFromFile(cfgFile)
 	if err != nil {
 		cobra.CheckErr(err)
 	}
+
+	slog.Debug("config",
+		slog.Any("config", cfg),
+	)
 
 	if len(cfg.Templates) == 0 {
 		cobra.CheckErr("no templates found in config file")

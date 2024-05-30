@@ -69,7 +69,20 @@ func createDestFile(destRootPath, relFilePath string, perm fs.FileMode) (*os.Fil
 	return file, nil
 }
 
+func isRegularFile(srcRootPath, relFilePath string) bool {
+	srcPath := filepath.Join(srcRootPath, relFilePath)
+	srcInfo, err := os.Stat(srcPath)
+	if err != nil {
+		return false
+	}
+	return srcInfo.Mode().IsRegular()
+}
+
 func copyFile(srcRootPath, destRootPath, relFilePath string) (int64, error) {
+	if !isRegularFile(srcRootPath, relFilePath) {
+		return 0, nil
+	}
+
 	err := ensureDirExists(srcRootPath, destRootPath, relFilePath)
 	if err != nil {
 		return 0, fmt.Errorf("failed to ensure directory exists: %w", err)
