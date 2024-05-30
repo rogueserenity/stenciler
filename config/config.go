@@ -2,11 +2,29 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
+)
+
+// HookClass is an enumeration type for the different classes of hooks that can be run.
+type HookClass int
+
+const (
+	// PreInitHook is a hook that runs before initializing the repository.
+	PreInitHook HookClass = iota
+	// PostInitHook is a hook that runs after initializing the repository.
+	PostInitHook
+	// PreUpdateHook is a hook that runs before updating the repository.
+	PreUpdateHook
+	// PostUpdateHook is a hook that runs after updating the repository.
+	PostUpdateHook
 )
 
 // Param holds all of the values for a parameter.
@@ -147,4 +165,56 @@ func (p *Param) LogValue() slog.Value {
 		slog.String("validation-hook", p.ValidationHook),
 		slog.String("value", p.Value),
 	)
+}
+
+// Validate runs the validation hook for the parameter and updates the value with the output of the hook. If there is no
+// validation hook, then the value is unchanged and the function returns no error. It expects the hook to return an
+// updated value written to standard out for the given parameter. No other output should be present on stdout. Standard
+// error content is ignored.
+func (p *Param) Validate(repoDir string) error {
+	if len(p.ValidationHook) == 0 {
+		return nil
+	}
+	hook := filepath.Join(repoDir, p.ValidationHook)
+	out, err := exec.Command("/bin/sh", hook, p.Name, p.Value).Output()
+	if err != nil {
+		return fmt.Errorf("failed to execute validation hook %s on %s with value %s: %w",
+			p.ValidationHook, p.Name, p.Value, err)
+	}
+	p.Value = strings.TrimSpace(string(out))
+
+	return nil
+}
+
+// ExecuteHooks executes each of the pre/post hooks in the order they were listed. If a hook exits with a non-zero exit
+// code, all execution with stop and an error will be returned.
+func (t *Template) ExecuteHooks(repoDir string, hookClass HookClass) error {
+	var hooks []string
+	switch hookClass {
+	case PreInitHook:
+		hooks = t.PreInitHookPaths
+	case PostInitHook:
+		hooks = t.PostInitHookPaths
+	case PreUpdateHook:
+		hooks = t.PreUpdateHookPaths
+	case PostUpdateHook:
+		hooks = t.PostUpdateHookPaths
+	default:
+		return fmt.Errorf("unknown hook class %d", hookClass)
+	}
+
+	for _, hook := range hooks {
+		if err := executeHook(filepath.Join(repoDir, hook)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func executeHook(hook string) error {
+	err := exec.Command("/bin/sh", hook).Run()
+	if err != nil {
+		return fmt.Errorf("failed to execute hook %s: %w", hook, err)
+	}
+	return nil
 }

@@ -1,4 +1,4 @@
-package hooks_test
+package config_test
 
 import (
 	"os"
@@ -8,14 +8,13 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/rogueserenity/stenciler/config"
-	"github.com/rogueserenity/stenciler/hooks"
 )
 
 var _ = Describe("Validate", func() {
 
 	DescribeTable("Validate with non-existent hooks", func(template config.Template) {
 		repoPath := "test-repo"
-		err := hooks.Validate(template, repoPath)
+		err := template.Validate(repoPath)
 		Expect(err).To(MatchError("hook invalid-hook does not exist"))
 	},
 		Entry("ValidationHook", config.Template{
@@ -48,7 +47,7 @@ var _ = Describe("Validate", func() {
 		err = file.Close()
 		Expect(err).NotTo(HaveOccurred())
 
-		err = hooks.Validate(template, repoPath)
+		err = template.Validate(repoPath)
 		Expect(err).To(MatchError("hook invalid-hook is not executable"))
 	},
 		Entry("ValidationHook", config.Template{
@@ -83,7 +82,7 @@ var _ = Describe("Validate", func() {
 		err = file.Close()
 		Expect(err).NotTo(HaveOccurred())
 
-		err = hooks.Validate(template, repoPath)
+		err = template.Validate(repoPath)
 		Expect(err).ToNot(HaveOccurred())
 	},
 		Entry("ValidationHook", config.Template{

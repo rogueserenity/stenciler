@@ -14,7 +14,6 @@ import (
 	"github.com/rogueserenity/stenciler/config"
 	"github.com/rogueserenity/stenciler/files"
 	"github.com/rogueserenity/stenciler/git"
-	"github.com/rogueserenity/stenciler/hooks"
 )
 
 var (
@@ -93,7 +92,7 @@ func doInit(repoURL *url.URL) {
 		Templates: []config.Template{template},
 	}
 
-	err = hooks.Validate(template, repoDir)
+	err = template.Validate(repoDir)
 	if err != nil {
 		cobra.CheckErr(err)
 	}
@@ -169,13 +168,7 @@ func prompt(template *config.Template) {
 			p.Value = p.Default
 		}
 
-		if len(p.ValidationHook) > 0 {
-			var err error
-			p.Value, err = hooks.ExecuteValidationHook(filepath.Join(repoDir, p.ValidationHook), p.Name, p.Value)
-			if err != nil {
-				cobra.CheckErr(err)
-			}
-		}
+		p.Validate(repoDir)
 	}
 }
 
@@ -187,7 +180,7 @@ func initialWrite(localConfig *config.Config) {
 
 	template := &localConfig.Templates[0]
 
-	err = hooks.ExecuteHooks(repoDir, template.PreInitHookPaths)
+	err = template.ExecuteHooks(repoDir, config.PreInitHook)
 	if err != nil {
 		cobra.CheckErr(err)
 	}
@@ -202,7 +195,7 @@ func initialWrite(localConfig *config.Config) {
 		cobra.CheckErr(err)
 	}
 
-	err = hooks.ExecuteHooks(repoDir, template.PostInitHookPaths)
+	err = template.ExecuteHooks(repoDir, config.PostInitHook)
 	if err != nil {
 		cobra.CheckErr(err)
 	}

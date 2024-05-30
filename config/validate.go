@@ -1,18 +1,16 @@
-package hooks
+package config
 
 import (
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"github.com/rogueserenity/stenciler/config"
 )
 
 // Validate validates all the hooks in the template exist and are executable.
-func Validate(template config.Template, repoPath string) error {
+func (t *Template) Validate(repoPath string) error {
 	var errs []error
-	hookPaths := gatherHookPaths(template)
+	hookPaths := t.gatherHookPaths()
 	for _, hookPath := range hookPaths {
 		if err := validateHook(hookPath, repoPath); err != nil {
 			errs = append(errs, err)
@@ -25,19 +23,19 @@ func Validate(template config.Template, repoPath string) error {
 	return nil
 }
 
-func gatherHookPaths(template config.Template) []string {
+func (t *Template) gatherHookPaths() []string {
 	var hookPaths []string
 
-	for _, param := range template.Params {
+	for _, param := range t.Params {
 		if param.ValidationHook != "" {
 			hookPaths = append(hookPaths, param.ValidationHook)
 		}
 	}
 
-	hookPaths = append(hookPaths, template.PreInitHookPaths...)
-	hookPaths = append(hookPaths, template.PostInitHookPaths...)
-	hookPaths = append(hookPaths, template.PreUpdateHookPaths...)
-	hookPaths = append(hookPaths, template.PostUpdateHookPaths...)
+	hookPaths = append(hookPaths, t.PreInitHookPaths...)
+	hookPaths = append(hookPaths, t.PostInitHookPaths...)
+	hookPaths = append(hookPaths, t.PreUpdateHookPaths...)
+	hookPaths = append(hookPaths, t.PostUpdateHookPaths...)
 
 	return hookPaths
 }
