@@ -87,17 +87,18 @@ func doInit(repoURL *url.URL) {
 		cobra.CheckErr("no templates found in config file")
 	}
 
-	template := selectTemplate(cfg)
 	localConfig := &config.Config{
-		Templates: []config.Template{template},
+		Templates: []config.Template{selectTemplate(cfg)},
 	}
+	template := &localConfig.Templates[0]
+	template.Repository = repoURL.String()
 
 	err = template.Validate(repoDir)
 	if err != nil {
 		cobra.CheckErr(err)
 	}
 
-	prompt(&template)
+	prompt(template)
 
 	initialWrite(localConfig)
 }
@@ -173,6 +174,7 @@ func prompt(template *config.Template) {
 }
 
 func initialWrite(localConfig *config.Config) {
+	slog.Debug("writing config file", slog.Any("localConfig", localConfig))
 	err := localConfig.WriteToFile(configFileName)
 	if err != nil {
 		cobra.CheckErr(err)
