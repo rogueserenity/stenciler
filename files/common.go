@@ -2,13 +2,13 @@ package files
 
 import (
 	"fmt"
-	"io"
 	"io/fs"
-	"log/slog"
 	"os"
 	"path/filepath"
 )
 
+// ensureDirExists ensures that the directory containing the file at relFilePath exists in destRootPath with the same
+// permissions as the directory containing the file at relFilePath in srcRootPath.
 func ensureDirExists(srcRootPath, destRootPath, relFilePath string) error {
 	if relFilePath == "." {
 		return nil
@@ -40,6 +40,7 @@ func ensureDirExists(srcRootPath, destRootPath, relFilePath string) error {
 	return nil
 }
 
+// openSourceFile opens the file at relFilePath in srcRootPath and returns the file and its FileInfo.
 func openSourceFile(srcRootPath string, relFilePath string) (*os.File, fs.FileInfo, error) {
 	srcPath := filepath.Join(srcRootPath, relFilePath)
 	srcInfo, err := os.Stat(srcPath)
@@ -56,6 +57,8 @@ func openSourceFile(srcRootPath string, relFilePath string) (*os.File, fs.FileIn
 	return file, srcInfo, nil
 }
 
+// createDestFile creates the file at relFilePath in destRootPath with the same permissions as the file at relFilePath
+// in srcRootPath.
 func createDestFile(destRootPath, relFilePath string, perm fs.FileMode) (*os.File, error) {
 	destPath := filepath.Join(destRootPath, relFilePath)
 	file, err := os.Create(destPath)
@@ -69,6 +72,7 @@ func createDestFile(destRootPath, relFilePath string, perm fs.FileMode) (*os.Fil
 	return file, nil
 }
 
+// isRegularFile returns true if the file at relFilePath in srcRootPath is a regular file.
 func isRegularFile(srcRootPath, relFilePath string) bool {
 	srcPath := filepath.Join(srcRootPath, relFilePath)
 	srcInfo, err := os.Stat(srcPath)
@@ -76,38 +80,4 @@ func isRegularFile(srcRootPath, relFilePath string) bool {
 		return false
 	}
 	return srcInfo.Mode().IsRegular()
-}
-
-func copyFile(srcRootPath, destRootPath, relFilePath string) (int64, error) {
-	if !isRegularFile(srcRootPath, relFilePath) {
-		return 0, nil
-	}
-
-	err := ensureDirExists(srcRootPath, destRootPath, relFilePath)
-	if err != nil {
-		return 0, fmt.Errorf("failed to ensure directory exists: %w", err)
-	}
-
-	srcFile, srcInfo, err := openSourceFile(srcRootPath, relFilePath)
-	if err != nil {
-		return 0, fmt.Errorf("failed to open source file: %w", err)
-	}
-	defer srcFile.Close()
-
-	destFile, err := createDestFile(destRootPath, relFilePath, srcInfo.Mode().Perm())
-	if err != nil {
-		return 0, fmt.Errorf("failed to create destination file: %w", err)
-	}
-	defer destFile.Close()
-
-	b, err := io.Copy(destFile, srcFile)
-	if err != nil {
-		return 0, fmt.Errorf("failed to copy %s: %w", relFilePath, err)
-	}
-
-	slog.Debug("copied file",
-		slog.String("src", srcFile.Name()),
-		slog.String("dest", destFile.Name()),
-	)
-	return b, nil
 }

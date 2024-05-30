@@ -2,6 +2,7 @@ package files
 
 import (
 	"fmt"
+	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -26,7 +27,7 @@ func CopyRaw(repoDir string, template *config.Template) error {
 	}
 
 	for _, f := range copyList {
-		_, err = copyFile(srcRootPath, destRootPath, f)
+		_, err = copyRawFile(srcRootPath, destRootPath, f)
 		if err != nil {
 			return fmt.Errorf("failed to copy %s: %w", f, err)
 		}
@@ -35,6 +36,7 @@ func CopyRaw(repoDir string, template *config.Template) error {
 	return nil
 }
 
+// generateRawCopyList generates a list of files to copy from the template directory without template processing.
 func generateRawCopyList(srcRootPath string, rawCopyPaths []string) ([]string, error) {
 	var copyList []string
 	srcRoot := os.DirFS(srcRootPath)
@@ -49,4 +51,40 @@ func generateRawCopyList(srcRootPath string, rawCopyPaths []string) ([]string, e
 	slog.Debug("copy list", slog.Any("files", copyList))
 
 	return copyList, nil
+}
+
+// copyRawFile copies the file at relFilePath in srcRootPath to destRootPath. It skips any non-regular files and will
+// ensure that the directory containing the file exists in destRootPath.
+func copyRawFile(srcRootPath, destRootPath, relFilePath string) (int64, error) {
+	if !isRegularFile(srcRootPath, relFilePath) {
+		return 0, nil
+	}
+
+	err := ensureDirExists(srcRootPath, destRootPath, relFilePath)
+	if err != nil {
+		return 0, fmt.Errorf("failed to ensure directory exists: %w", err)
+	}
+
+	srcFile, srcInfo, err := openSourceFile(srcRootPath, relFilePath)
+	if err != nil {
+		return 0, fmt.Errorf("failed to open source file: %w", err)
+	}
+	defer srcFile.Close()
+
+	destFile, err := createDestFile(destRootPath, relFilePath, srcInfo.Mode().Perm())
+	if err != nil {
+		return 0, fmt.Errorf("failed to create destination file: %w", err)
+	}
+	defer destFile.Close()
+
+	b, err := io.Copy(destFile, srcFile)
+	if err != nil {
+		return 0, fmt.Errorf("failed to copy %s: %w", relFilePath, err)
+	}
+
+	slog.Debug("copied file",
+		slog.String("src", srcFile.Name()),
+		slog.String("dest", destFile.Name()),
+	)
+	return b, nil
 }
