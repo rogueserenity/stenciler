@@ -1,5 +1,0 @@
-templates:
-    - repository: ""
-      directory: test1
-      raw-copy:
-        - '**'
