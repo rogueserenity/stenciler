@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"log/slog"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,11 +27,7 @@ var initCmd = &cobra.Command{
 	Long:  "Initializes the current directory with the contents of the specified template.",
 
 	Run: func(_ *cobra.Command, args []string) {
-		url, err := url.Parse(args[0])
-		if err != nil {
-			cobra.CheckErr("repoURL must be a valid URL")
-		}
-		doInit(url)
+		doInit(args[0])
 	},
 }
 
@@ -47,9 +42,9 @@ func init() {
 	rootCmd.AddCommand(initCmd)
 }
 
-func doInit(repoURL *url.URL) {
+func doInit(repoURL string) {
 	slog.Debug("init called",
-		slog.String("repoURL", repoURL.String()),
+		slog.String("repoURL", repoURL),
 		slog.String("repoDir", repoDir),
 		slog.Bool("authTokenProvided", len(authToken) > 0),
 		slog.String("templateDir", templateDir),
@@ -57,13 +52,13 @@ func doInit(repoURL *url.URL) {
 
 	var err error
 	if len(repoDir) == 0 {
-		repoDir, err = git.Clone(repoURL.String(), authToken)
+		repoDir, err = git.Clone(repoURL, authToken)
 		if err != nil {
 			cobra.CheckErr(err)
 		}
 		defer os.RemoveAll(repoDir)
 		slog.Debug("cloned repository",
-			slog.String("repoURL", repoURL.String()),
+			slog.String("repoURL", repoURL),
 			slog.String("repoDir", repoDir),
 		)
 	}
@@ -91,7 +86,7 @@ func doInit(repoURL *url.URL) {
 		Templates: []config.Template{selectTemplate(cfg)},
 	}
 	template := &localConfig.Templates[0]
-	template.Repository = repoURL.String()
+	template.Repository = repoURL
 
 	err = template.Validate(repoDir)
 	if err != nil {
