@@ -164,7 +164,10 @@ func prompt(template *config.Template) {
 			p.Value = p.Default
 		}
 
-		p.Validate(repoDir)
+		err := p.Validate(repoDir)
+		if err != nil {
+			cobra.CheckErr(err)
+		}
 	}
 }
 
