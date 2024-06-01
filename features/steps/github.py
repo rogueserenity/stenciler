@@ -1,10 +1,11 @@
-from behave import Given, When, Then
-from behave.runner import Context
 import os
 import subprocess
 
+from behave import given, when, then
+from behave.runner import Context
 
-@Given('I have a "{visibility}" repository on GitHub')
+
+@given('I have a "{visibility}" repository on GitHub')
 def step_impl(
     context: Context,
     visibility: str,
@@ -16,7 +17,7 @@ def step_impl(
         context.repository = "rogueserenity/stenciler-tests-private"
 
 
-@Given('I have the "{protocol}" URL of the repository')
+@given('I have the "{protocol}" URL of the repository')
 def step_impl(
     context: Context,
     protocol: str,
@@ -28,7 +29,7 @@ def step_impl(
         context.repository_url = f"git@github.com:{context.repository}.git"
 
 
-@When("I run stenciler init with the repository URL in an empty directory")
+@when("I run stenciler init with the repository URL in an empty directory")
 def step_impl(
     context: Context,
 ):
@@ -38,16 +39,19 @@ def step_impl(
         command.append(os.environ["TEST_REPO_TOKEN"])
     stenciler_init = subprocess.run(
         command,
+        check=False,
         cwd=context.local_repo_dir.name,
     )
     assert stenciler_init.returncode == 0
 
 
-@Then("I see the current directory initialized with the template data")
+@then("I see the current directory initialized with the template data")
 def step_impl(
     context: Context,
 ):
     assert os.path.exists(os.path.join(context.local_repo_dir.name, ".stenciler.yaml"))
     assert os.path.exists(os.path.join(context.local_repo_dir.name, "foo"))
     assert os.path.exists(os.path.join(context.local_repo_dir.name, "foo", "bar"))
-    assert os.path.exists(os.path.join(context.local_repo_dir.name, "foo", "bar", "baz.txt"))
+    assert os.path.exists(
+        os.path.join(context.local_repo_dir.name, "foo", "bar", "baz.txt")
+    )
