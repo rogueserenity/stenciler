@@ -1,0 +1,55 @@
+{
+	"name": "Stenciler Development",
+	"image": "mcr.microsoft.com/devcontainers/go:1.22",
+	"features": {
+		"ghcr.io/devcontainers/features/python:1": {
+			"version": "3.12",
+			"toolsToInstall": "black,poetry,pylint"
+		}
+	},
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "zsh",
+				"terminal.integrated.profiles.linux": {
+					"zsh": {
+						"path": "/bin/zsh"
+					}
+				},
+				"[python]": {
+					"editor.defaultFormatter": "ms-python.black-formatter",
+					"editor.rulers": [
+						88
+					]
+				},
+				"cucumberautocomplete.steps": "features/steps/*.py",
+				"cucumberautocomplete.syncfeatures": "features/*.feature",
+				"cucumberautocomplete.strictGherkinCompletion": true,
+				"cucumberautocomplete.strictGherkinValidation": true
+			},
+			"extensions": [
+				"alexkrechik.cucumberautocomplete",
+				"ms-azuretools.vscode-docker",
+				"ms-python.black-formatter",
+				"joselitofilho.ginkgotestexplorer",
+				"github.copilot",
+				"github.vscode-github-actions",
+				"github.copilot",
+				"github.copilot-chat",
+				"github.vscode-pull-request-github",
+				"golang.go",
+				"yzhang.markdown-all-in-one",
+				"davidanson.vscode-markdownlint",
+				"bmalehorn.shell-syntax",
+				"vivaxy.vscode-conventional-commits"
+			]
+		}
+	},
+	"onCreateCommand": {
+		"golangci-lint": "go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.0",
+		"goreleaser": "go install github.com/goreleaser/goreleaser@v1.26.2",
+		"ginkgo": "go install github.com/onsi/ginkgo/v2/ginkgo@v2.19.0",
+		"mockery": "go install github.com/vektra/mockery/v2@v2.43.1",
+		"cobra-cli": "go install github.com/spf13/cobra-cli@v1.3.0"
+	}
+}
