@@ -24,3 +24,6 @@ vendor/
 go.work
 
 dist/
+
+# python venv
+.venv/
