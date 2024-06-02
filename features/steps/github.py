@@ -45,7 +45,7 @@ def step_impl(
     assert stenciler_init.returncode == 0
 
 
-@then("I see the current directory initialized with the template data")
+@then("I see the current directory initialized with the repo template data")
 def step_impl(
     context: Context,
 ):

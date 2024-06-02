@@ -4,7 +4,7 @@ Feature: Cloning a repository
     Given I have a "<visibility>" repository on GitHub
     And I have the "<protocol>" URL of the repository
     When I run stenciler init with the repository URL in an empty directory
-    Then I see the current directory initialized with the template data
+    Then I see the current directory initialized with the repo template data
 
     Examples:
       | visibility | protocol |
