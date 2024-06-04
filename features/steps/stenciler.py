@@ -1,7 +1,20 @@
 import subprocess
+from queue import Queue, Empty
+from threading import Thread
 
 from behave import when
 from behave.runner import Context
+
+
+def enqueue_output(out, queue):
+    while True:
+        buf = ""
+        c = out.read(1)
+        while c != ":":
+            buf += c
+            c = out.read(1)
+        queue.put(buf)
+        c = out.read(1)  # skip the trailing space
 
 
 @when("I run stenciler init with the repository URL in an empty directory")
@@ -20,11 +33,30 @@ def step_impl(
         command.append("-r")
         command.append(context.input_dir.name)
 
-    stenciler_init = subprocess.run(
+    stenciler_init = subprocess.Popen(  # pylint: disable=R1732
         command,
-        check=False,
         cwd=context.output_dir.name,
-        capture_output=True,
+        text=True,
+        bufsize=0,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
+
+    out_queue = Queue()
+    out_thread = Thread(target=enqueue_output, args=(stenciler_init.stdout, out_queue))
+    out_thread.daemon = True
+    out_thread.start()
+
+    while True:
+        try:
+            line = out_queue.get_nowait()
+            print(line)
+            value = context.prompts[line]
+            print(value)
+            stenciler_init.stdin.write(value + "\n")
+        except Empty:
+            if stenciler_init.poll() is not None:
+                break
 
     assert stenciler_init.returncode == 0

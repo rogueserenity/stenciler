@@ -10,6 +10,7 @@ def before_all(context):
     context.auth_token = None
     context.input_dir = None
     context.template_root_dir = None
+    context.prompts = None
 
 
 def before_scenario(context, scenario):
