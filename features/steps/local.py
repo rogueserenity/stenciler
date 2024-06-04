@@ -84,7 +84,9 @@ def step_impl(
         f.write("RogueSerenity\n")
 
 
-@given("I have a local template with a templated file and a prompt")
+@given(
+    "I have a local template with a templated file that prompts with no default value"
+)
 def step_impl(
     context: Context,
 ):
