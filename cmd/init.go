@@ -190,7 +190,7 @@ func initialWrite(localConfig *config.Config) {
 		cobra.CheckErr(err)
 	}
 
-	err = files.CopyTemplated(repoDir, template, false)
+	err = files.CopyTemplated(repoDir, template)
 	if err != nil {
 		cobra.CheckErr(err)
 	}

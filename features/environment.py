@@ -28,8 +28,16 @@ def before_scenario(context, scenario):
             context.input_dir.name, context.yaml_file_name
         )
 
+        context.expected_dir = tempfile.TemporaryDirectory(  # pylint: disable=R1732
+            prefix="stenciler-expected-"
+        )
+        context.expected_config_file = os.path.join(
+            context.expected_dir.name, context.yaml_file_name
+        )
+
 
 def after_scenario(context, _):
     context.output_dir.cleanup()
     if context.input_dir is not None:
         context.input_dir.cleanup()
+        context.expected_dir.cleanup()
