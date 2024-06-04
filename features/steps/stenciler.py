@@ -1,3 +1,4 @@
+import re
 import subprocess
 from queue import Queue, Empty
 from threading import Thread
@@ -13,7 +14,8 @@ def enqueue_output(out, queue):
         while c != ":":
             buf += c
             c = out.read(1)
-        queue.put(buf)
+        buf = re.sub(r"\[.*\]", "", buf)
+        queue.put(buf.rstrip())
         c = out.read(1)  # skip the trailing space
 
 

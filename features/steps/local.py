@@ -127,3 +127,44 @@ def step_impl(
     os.makedirs(leaf_dir1, exist_ok=True)
     with open(os.path.join(leaf_dir1, "file.txt"), "w", encoding="utf-8") as f:
         f.write("RogueSerenity\n")
+
+
+@given(
+    "I have a local template with a templated file that prompts with a default value"
+)
+def step_impl(
+    context: Context,
+):
+    context.repository_url = "https://github.com/local/repo"
+    context.template_root_dir = "foo"
+    root = os.path.join(context.input_dir.name, context.template_root_dir)
+    leaf_dir1 = os.path.join(root, "bar", "baz")
+    os.makedirs(leaf_dir1, exist_ok=True)
+    with open(os.path.join(leaf_dir1, "file.txt"), "w", encoding="utf-8") as f:
+        f.write("Rogue{{.ship}}\n")
+
+    context.prompts = {
+        "What is the name of your ship?": "",
+    }
+
+    yaml_data = {
+        "templates": [
+            {
+                "directory": "foo",
+                "params": [
+                    {
+                        "name": "ship",
+                        "prompt": "What is the name of your ship?",
+                        "default": "Serenity",
+                    },
+                ],
+            },
+        ],
+    }
+    with open(context.input_config_file, "w", encoding="utf-8") as f:
+        yaml.dump(yaml_data, f)
+
+    leaf_dir1 = os.path.join(context.expected_dir.name, "bar", "baz")
+    os.makedirs(leaf_dir1, exist_ok=True)
+    with open(os.path.join(leaf_dir1, "file.txt"), "w", encoding="utf-8") as f:
+        f.write("RogueSerenity\n")
