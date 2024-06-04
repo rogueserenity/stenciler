@@ -28,12 +28,13 @@
 				"cucumberautocomplete.strictGherkinValidation": true,
 				"dotfiles.repository": "rogueserenity/stenciler-ohmyzsh-custom",
 				"dotfiles.targetPath": "~/.ohmyzsh-custom",
-				"dotfiles.installCommand": "bootstrap"			
+				"dotfiles.installCommand": "bootstrap"
 			},
 			"extensions": [
 				"alexkrechik.cucumberautocomplete",
 				"ms-azuretools.vscode-docker",
 				"ms-python.black-formatter",
+				"ms-python.pylint",
 				"joselitofilho.ginkgotestexplorer",
 				"github.copilot",
 				"github.vscode-github-actions",
