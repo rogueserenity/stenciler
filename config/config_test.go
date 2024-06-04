@@ -141,7 +141,7 @@ templates:
 						{
 							Repository: "https://github.com/rogueserenity/stenciler-test",
 							Directory:  "test",
-							Params: []config.Param{
+							Params: []*config.Param{
 								{
 									Name:           "spoo",
 									Prompt:         "Would you like spoo?",

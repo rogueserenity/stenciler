@@ -18,7 +18,7 @@ var _ = Describe("Validate", func() {
 		Expect(err).To(MatchError("hook invalid-hook does not exist"))
 	},
 		Entry("ValidationHook", config.Template{
-			Params: []config.Param{
+			Params: []*config.Param{
 				{
 					ValidationHook: "invalid-hook",
 				},
@@ -51,7 +51,7 @@ var _ = Describe("Validate", func() {
 		Expect(err).To(MatchError("hook invalid-hook is not executable"))
 	},
 		Entry("ValidationHook", config.Template{
-			Params: []config.Param{
+			Params: []*config.Param{
 				{
 					ValidationHook: "invalid-hook",
 				},
@@ -86,7 +86,7 @@ var _ = Describe("Validate", func() {
 		Expect(err).ToNot(HaveOccurred())
 	},
 		Entry("ValidationHook", config.Template{
-			Params: []config.Param{
+			Params: []*config.Param{
 				{
 					ValidationHook: "invalid-hook",
 				},

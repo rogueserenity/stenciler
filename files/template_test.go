@@ -58,7 +58,7 @@ var _ = Describe("CopyTemplated", func() {
 		BeforeEach(func() {
 			template = &config.Template{
 				Directory: "root",
-				Params: []config.Param{
+				Params: []*config.Param{
 					{
 						Name:  "foo",
 						Value: "foo",

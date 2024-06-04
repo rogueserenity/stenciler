@@ -60,7 +60,7 @@ type Template struct {
 	Directory string `yaml:"directory"`
 
 	// Params is a list of parameters to prompt the user for when initializing a new repository. Optional.
-	Params []Param `yaml:"params,omitempty"`
+	Params []*Param `yaml:"params,omitempty"`
 
 	// InitOnlyPaths are a list of glob paths that are only copied over during intialization. Optional. The glob paths
 	// are relative to Directory.

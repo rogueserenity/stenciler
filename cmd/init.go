@@ -158,7 +158,7 @@ func prompt(template *config.Template) {
 			continue
 		}
 
-		printPrompt(p)
+		printPrompt(*p)
 		p.Value = readPromptResponse()
 		if len(p.Value) == 0 {
 			p.Value = p.Default
