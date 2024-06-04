@@ -1,4 +1,4 @@
-Feature: Simple Processing
+Feature: Local Template Processing
 
   Scenario: Processing a template that contains only raw copy files
     Given I have a local template with only raw copy files
@@ -19,5 +19,17 @@ Feature: Simple Processing
   @prompt
   Scenario: Processing a template that a single templated file with a prompt with a default value
     Given I have a local template with a templated file that prompts with a default value
+    When I run stenciler init with the repository URL in an empty directory
+    Then I see the current directory initialized with the template data
+
+  @prompt
+  Scenario: Processing a template that a single templated file with a prompt with no default value and a hook
+    Given I have a local template with a templated file that prompts with no default value and a hook
+    When I run stenciler init with the repository URL in an empty directory
+    Then I see the current directory initialized with the template data
+
+  @prompt
+  Scenario: Processing a template that a single templated file with a prompt with a default value and a hook
+    Given I have a local template with a templated file that prompts with a default value and a hook
     When I run stenciler init with the repository URL in an empty directory
     Then I see the current directory initialized with the template data
