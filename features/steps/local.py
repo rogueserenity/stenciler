@@ -265,3 +265,165 @@ def step_impl(
     os.makedirs(leaf_dir1, exist_ok=True)
     with open(os.path.join(leaf_dir1, "file.txt"), "w", encoding="utf-8") as f:
         f.write("RogueSerenity\n")
+
+
+@given("I have a local template with a pre-init hook")
+def step_impl(
+    context: Context,
+):
+    context.repository_url = "https://github.com/local/repo"
+    context.template_root_dir = "foo"
+    root = os.path.join(context.input_dir.name, context.template_root_dir)
+    os.makedirs(root, exist_ok=True)
+
+    hooks_dir = os.path.join(context.input_dir.name, "hooks")
+    os.makedirs(hooks_dir, exist_ok=True)
+    hook = os.path.join(hooks_dir, "create_ship.sh")
+    with open(hook, "w", encoding="utf-8") as f:
+        f.write("mkdir -p bar/baz; echo 'RogueSerenity' > bar/baz/file.txt")
+    os.chmod(hook, 0o755)
+
+    yaml_data = {
+        "templates": [
+            {
+                "directory": "foo",
+                "pre-init-hooks": [
+                    "hooks/create_ship.sh",
+                ],
+            },
+        ],
+    }
+    with open(context.input_config_file, "w", encoding="utf-8") as f:
+        yaml.dump(yaml_data, f)
+
+    leaf_dir1 = os.path.join(context.expected_dir.name, "bar", "baz")
+    os.makedirs(leaf_dir1, exist_ok=True)
+    with open(os.path.join(leaf_dir1, "file.txt"), "w", encoding="utf-8") as f:
+        f.write("RogueSerenity\n")
+
+
+@given("I have a local template with multiple pre-init hooks")
+def step_impl(
+    context: Context,
+):
+    context.repository_url = "https://github.com/local/repo"
+    context.template_root_dir = "foo"
+    root = os.path.join(context.input_dir.name, context.template_root_dir)
+    os.makedirs(root, exist_ok=True)
+
+    hooks_dir = os.path.join(context.input_dir.name, "hooks")
+    os.makedirs(hooks_dir, exist_ok=True)
+
+    hook1 = os.path.join(hooks_dir, "create_ship.sh")
+    with open(hook1, "w", encoding="utf-8") as f:
+        f.write("mkdir -p bar/baz; echo 'RogueSerenity' > bar/baz/file.txt")
+    os.chmod(hook1, 0o755)
+
+    hook2 = os.path.join(hooks_dir, "create_foo.sh")
+    with open(hook2, "w", encoding="utf-8") as f:
+        f.write("touch bar/baz/foo.txt")
+    os.chmod(hook2, 0o755)
+
+    yaml_data = {
+        "templates": [
+            {
+                "directory": "foo",
+                "pre-init-hooks": [
+                    "hooks/create_ship.sh",
+                    "hooks/create_foo.sh",
+                ],
+            },
+        ],
+    }
+    with open(context.input_config_file, "w", encoding="utf-8") as f:
+        yaml.dump(yaml_data, f)
+
+    leaf_dir1 = os.path.join(context.expected_dir.name, "bar", "baz")
+    os.makedirs(leaf_dir1, exist_ok=True)
+
+    with open(os.path.join(leaf_dir1, "file.txt"), "w", encoding="utf-8") as f:
+        f.write("RogueSerenity\n")
+
+    with open(os.path.join(leaf_dir1, "foo.txt"), "w", encoding="utf-8") as f:
+        pass
+
+
+@given("I have a local template with a post-init hook")
+def step_impl(
+    context: Context,
+):
+    context.repository_url = "https://github.com/local/repo"
+    context.template_root_dir = "foo"
+    root = os.path.join(context.input_dir.name, context.template_root_dir)
+    os.makedirs(root, exist_ok=True)
+
+    hooks_dir = os.path.join(context.input_dir.name, "hooks")
+    os.makedirs(hooks_dir, exist_ok=True)
+    hook = os.path.join(hooks_dir, "create_ship.sh")
+    with open(hook, "w", encoding="utf-8") as f:
+        f.write("mkdir -p bar/baz; echo 'RogueSerenity' > bar/baz/file.txt")
+    os.chmod(hook, 0o755)
+
+    yaml_data = {
+        "templates": [
+            {
+                "directory": "foo",
+                "post-init-hooks": [
+                    "hooks/create_ship.sh",
+                ],
+            },
+        ],
+    }
+    with open(context.input_config_file, "w", encoding="utf-8") as f:
+        yaml.dump(yaml_data, f)
+
+    leaf_dir1 = os.path.join(context.expected_dir.name, "bar", "baz")
+    os.makedirs(leaf_dir1, exist_ok=True)
+    with open(os.path.join(leaf_dir1, "file.txt"), "w", encoding="utf-8") as f:
+        f.write("RogueSerenity\n")
+
+
+@given("I have a local template with multiple post-init hooks")
+def step_impl(
+    context: Context,
+):
+    context.repository_url = "https://github.com/local/repo"
+    context.template_root_dir = "foo"
+    root = os.path.join(context.input_dir.name, context.template_root_dir)
+    os.makedirs(root, exist_ok=True)
+
+    hooks_dir = os.path.join(context.input_dir.name, "hooks")
+    os.makedirs(hooks_dir, exist_ok=True)
+
+    hook1 = os.path.join(hooks_dir, "create_ship.sh")
+    with open(hook1, "w", encoding="utf-8") as f:
+        f.write("mkdir -p bar/baz; echo 'RogueSerenity' > bar/baz/file.txt")
+    os.chmod(hook1, 0o755)
+
+    hook2 = os.path.join(hooks_dir, "create_foo.sh")
+    with open(hook2, "w", encoding="utf-8") as f:
+        f.write("touch bar/baz/foo.txt")
+    os.chmod(hook2, 0o755)
+
+    yaml_data = {
+        "templates": [
+            {
+                "directory": "foo",
+                "post-init-hooks": [
+                    "hooks/create_ship.sh",
+                    "hooks/create_foo.sh",
+                ],
+            },
+        ],
+    }
+    with open(context.input_config_file, "w", encoding="utf-8") as f:
+        yaml.dump(yaml_data, f)
+
+    leaf_dir1 = os.path.join(context.expected_dir.name, "bar", "baz")
+    os.makedirs(leaf_dir1, exist_ok=True)
+
+    with open(os.path.join(leaf_dir1, "file.txt"), "w", encoding="utf-8") as f:
+        f.write("RogueSerenity\n")
+
+    with open(os.path.join(leaf_dir1, "foo.txt"), "w", encoding="utf-8") as f:
+        pass
