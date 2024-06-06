@@ -28,9 +28,6 @@ jobs:
           imageName: ghcr.io/rogueserenity/stenciler-devcontainer
           cacheFrom: ghcr.io/rogueserenity/stenciler-devcontainer
           push: always
-          runCmd: |
-            go mod download
-            poetry install
 
   lint:
     runs-on: ubuntu-latest
@@ -44,8 +41,10 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           cacheFrom: ghcr.io/rogueserenity/stenciler-devcontainer
+          push: never
           runCmd: |
             golangci-lint run
+            poetry install
             poetry run black features
             poetry run pylint features
 
@@ -61,6 +60,7 @@ jobs:
         uses: devcontainers/ci@v0.3
         with:
           cacheFrom: ghcr.io/rogueserenity/stenciler-devcontainer
+          push: never
           runCmd: |
             ginkgo -r --randomize-all
 
@@ -74,10 +74,12 @@ jobs:
 
       - name: functional test
         uses: devcontainers/ci@v0.3
-        env:
-          TEST_REPO_TOKEN: ${{ secrets.TEST_REPO_TOKEN }}
         with:
+          env: |
+            TEST_REPO_TOKEN=${{ secrets.TEST_REPO_TOKEN }}
           cacheFrom: ghcr.io/rogueserenity/stenciler-devcontainer
+          push: never
           runCmd: |
             go build
+            poetry install
             poetry run behave
