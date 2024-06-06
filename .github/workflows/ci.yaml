@@ -82,4 +82,4 @@ jobs:
           runCmd: |
             go build
             poetry install
-            poetry run behave
+            poetry run behave -t ~@ssh
