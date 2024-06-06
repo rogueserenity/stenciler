@@ -15,19 +15,13 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v4
 
-      - name: login to GitHub Container Registry
-        uses: docker/login-action@v3
+      - name: setup go
+        uses: actions/setup-go@v5
         with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          go-version: '1.22'
 
-      - name: pre-build dev container image
-        uses: devcontainers/ci@v0.3
-        with:
-          imageName: ghcr.io/rogueserenity/stenciler-devcontainer
-          cacheFrom: ghcr.io/rogueserenity/stenciler-devcontainer
-          push: always
+      - name: build
+        run: go build
 
   lint:
     runs-on: ubuntu-latest
@@ -37,16 +31,31 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v4
 
-      - name: lint
-        uses: devcontainers/ci@v0.3
+      - name: setup go
+        uses: actions/setup-go@v5
         with:
-          cacheFrom: ghcr.io/rogueserenity/stenciler-devcontainer
-          push: never
-          runCmd: |
-            golangci-lint run
-            poetry install
-            poetry run black features
-            poetry run pylint features
+          go-version: '1.22'
+
+      - name: setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: setup poetry
+        uses: Gr1N/setup-poetry@v9
+
+      - run: poetry install
+
+      - name: lint python
+        run: |
+          poetry run black features
+          poetry run pylint features
+
+      - name: lint go
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: 'v1.59.0'
+
 
   unit-test:
     runs-on: ubuntu-latest
