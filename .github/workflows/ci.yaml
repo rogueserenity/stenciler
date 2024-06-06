@@ -32,6 +32,14 @@ jobs:
             go mod download
             poetry install
 
+  lint:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
       - name: lint
         uses: devcontainers/ci@v0.3
         with:
@@ -40,3 +48,36 @@ jobs:
             golangci-lint run
             poetry run black features
             poetry run pylint features
+
+  unit-test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: unit test
+        uses: devcontainers/ci@v0.3
+        with:
+          cacheFrom: ghcr.io/rogueserenity/stenciler-devcontainer
+          runCmd: |
+            ginkgo -r --randomize-all
+
+  functional-test:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: functional test
+        uses: devcontainers/ci@v0.3
+        env:
+          TEST_REPO_TOKEN: ${{ secrets.TEST_REPO_TOKEN }}
+        with:
+          cacheFrom: ghcr.io/rogueserenity/stenciler-devcontainer
+          runCmd: |
+            go build
+            poetry run behave
