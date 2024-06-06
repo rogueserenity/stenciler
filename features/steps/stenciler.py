@@ -1,3 +1,4 @@
+import os
 import re
 import subprocess
 from queue import Queue, Empty
@@ -23,7 +24,8 @@ def enqueue_output(out, queue):
 def step_impl(
     context: Context,
 ):
-    command = ["/workspaces/stenciler/stenciler", "init"]
+    stenciler = os.path.join(os.getcwd(), "stenciler")
+    command = [stenciler, "init"]
     assert context.repository_url is not None, "context.repository_url must be provided"
     command.append(context.repository_url)
 
