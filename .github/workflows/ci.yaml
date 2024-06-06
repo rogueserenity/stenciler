@@ -33,7 +33,7 @@ jobs:
 
       - name: lint python
         run: |
-          poetry run black features
+          poetry run black features --check
           poetry run pylint features
 
       - name: lint go
