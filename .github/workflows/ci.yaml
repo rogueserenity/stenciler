@@ -14,11 +14,18 @@ jobs:
       - name: Pre-build dev container image
         uses: devcontainers/ci@v0.3
         with:
-          imageName: ghcr.io/example/example-devcontainer
-          cacheFrom: ghcr.io/example/example-devcontainer
+          imageName: ghcr.io/rogueserenity/stenciler-devcontainer
+          cacheFrom: ghcr.io/rogueserenity/stenciler-devcontainer
           push: always
+          runCmd: |
+            go mod download
+            poetry install
 
       - name: lint
         uses: devcontainers/ci@v0.3
         with:
-          runCmd: lint
+          cacheFrom: ghcr.io/rogueserenity/stenciler-devcontainer
+          runCmd: |
+            golangci-lint run
+            poetry run black features
+            poetry run pylint features
