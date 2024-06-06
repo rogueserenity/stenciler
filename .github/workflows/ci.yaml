@@ -3,29 +3,9 @@ name: CI
 on:
   push:
 
-permissions:
-  contents: read
-  packages: write
-
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: checkout code
-        uses: actions/checkout@v4
-
-      - name: setup go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.22'
-
-      - name: build
-        run: go build
-
   lint:
     runs-on: ubuntu-latest
-
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -58,36 +38,45 @@ jobs:
 
   unit-test:
     runs-on: ubuntu-latest
-    needs: build
-
     steps:
       - name: checkout code
         uses: actions/checkout@v4
 
-      - name: unit test
-        uses: devcontainers/ci@v0.3
+      - name: setup go
+        uses: actions/setup-go@v5
         with:
-          cacheFrom: ghcr.io/rogueserenity/stenciler-devcontainer
-          push: never
-          runCmd: |
-            ginkgo -r --randomize-all
+          go-version: '1.22'
+
+      - name: install ginkgo
+        run: go install github.com/onsi/ginkgo/ginkgo@v2.19.0
+
+      - name: unit test
+        run: ginkgo -r --randomize-all
+
 
   functional-test:
     runs-on: ubuntu-latest
-    needs: build
-
     steps:
       - name: checkout code
         uses: actions/checkout@v4
 
-      - name: functional test
-        uses: devcontainers/ci@v0.3
+      - name: setup go
+        uses: actions/setup-go@v5
         with:
-          env: |
-            TEST_REPO_TOKEN=${{ secrets.TEST_REPO_TOKEN }}
-          cacheFrom: ghcr.io/rogueserenity/stenciler-devcontainer
-          push: never
-          runCmd: |
-            go build
-            poetry install
-            poetry run behave -t ~@ssh
+          go-version: '1.22'
+
+      - name: build
+        run: go build
+
+      - name: setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: setup poetry
+        uses: Gr1N/setup-poetry@v9
+
+      - run: poetry install
+
+      - name: functional test
+        run: poetry run behave -t ~@ssh
