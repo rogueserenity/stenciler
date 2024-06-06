@@ -1,0 +1,87 @@
+{
+  "$id": "https://raw.githubusercontent.com/rogueserenity/stenciler/main/stenciler-schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Stenciler Configuration Schema",
+  "description": "Schema for Stenciler configuration files",
+  "type": "array",
+  "items": {
+    "$ref": "#/$defs/template"
+  },
+  "$defs": {
+    "param": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the parameter"
+        },
+        "prompt": {
+          "type": "string",
+          "description": "The prompt to display to the user when initializing a new repository. Optional. If not provided, the parameter is considered internal only."
+        },
+        "default": {
+          "description": "The default value to use if the user does not provide one. Optional. An empty string is used as the default if no default is provided and the user does not set a value."
+        },
+        "validation-hook": {
+          "type": "string",
+          "description": "The path to a script to run to validate the value. Optional. The path is relative to the repository root."
+        },
+        "value": {
+          "type": "string",
+          "description": "The value of the parameter. For a template, this is ignored if Prompt is set. \nFor a repository, the value is determined by the following rules: \n1. If the parameter is internal only, the value is the value from the template.\n2. If the parameter has a prompt, the user is prompted for the value. The default is used if the user does not\nprovide a value.\n3. If the parameter has a ValidationHook, then that is executed and the output is the value."
+        }
+      },
+      "required": [
+        "name"
+      ]
+    },
+    "template": {
+      "type": "object",
+      "properties": {
+        "repository": {
+          "type": "string",
+          "description": "The URL of the repository to clone. Required."
+        },
+        "directory": {
+          "type": "string",
+          "description": "The directory at the root of the repository that holds the template data. Required."
+        },
+        "params": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/param"
+          },
+          "description": "The list of parameters to prompt the user for when initializing a new repository. Optional."
+        },
+        "init-only": {
+          "type": "string",
+          "description": "The list of glob paths that are only copied over during intialization. Optional. The glob paths are relative to directory."
+        },
+        "raw-copy": {
+          "type": "string",
+          "description": "The list of glob paths that are copied without being run through the template engine. Optional. The glob paths are relative to directory."
+        },
+        "pre-init-hooks": {
+          "type": "string",
+          "description": "The list of paths to scripts to run before initializing the repository. Optional. The paths are relative to the repository root. The hooks are run in the order they are defined."
+        },
+        "post-init-hooks": {
+          "type": "string",
+          "description": "The list of paths to scripts to run after initializing the repository. Optional. The paths are relative to the repository root. The hooks are run in the order they are defined."
+        },
+        "pre-update-hooks": {
+          "type": "string",
+          "description": "The list of paths to scripts to run before updating the repository. Optional. The paths are relative to the repository root. The hooks are run in the order they are defined."
+        },
+        "post-update-hooks": {
+          "type": "string",
+          "description": "The list of paths to scripts to run after updating the repository. Optional. The paths are relative to the repository root. The hooks are run in the order they are defined."
+        }
+      },
+      "required": [
+        "repository",
+        "directory"
+      ]
+    }
+  }
+}
