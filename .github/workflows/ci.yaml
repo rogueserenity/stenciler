@@ -3,6 +3,12 @@ name: CI
 on:
   push:
 
+env:
+  GO_VERSION: 1.22
+  PY_VERSION: 3.12
+  GOLANGCI_LINT_VERSION: v1.59.0
+  GINKGO_VERSION: v2.19.0
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -13,12 +19,12 @@ jobs:
       - name: setup go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: ${{ env.GO_VERSION }}
 
       - name: setup python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ env.PY_VERSION }}
 
       - name: setup poetry
         uses: Gr1N/setup-poetry@v9
@@ -33,7 +39,7 @@ jobs:
       - name: lint go
         uses: golangci/golangci-lint-action@v6
         with:
-          version: 'v1.59.0'
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
 
 
   unit-test:
@@ -45,10 +51,10 @@ jobs:
       - name: setup go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: ${{ env.GO_VERSION }}
 
       - name: install ginkgo
-        run: go install github.com/onsi/ginkgo/v2/ginkgo@v2.19.0
+        run: go install github.com/onsi/ginkgo/v2/ginkgo@${{ env.GINKGO_VERSION }}
 
       - name: unit test
         run: ginkgo -r --randomize-all
@@ -63,7 +69,7 @@ jobs:
       - name: setup go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: ${{ env.GO_VERSION }}
 
       - name: build
         run: go build
@@ -71,7 +77,7 @@ jobs:
       - name: setup python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ env.PY_VERSION }}
 
       - name: setup poetry
         uses: Gr1N/setup-poetry@v9
