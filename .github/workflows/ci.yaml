@@ -48,7 +48,7 @@ jobs:
           go-version: '1.22'
 
       - name: install ginkgo
-        run: go install github.com/onsi/ginkgo/ginkgo@v2.19.0
+        run: go install github.com/onsi/ginkgo/v2@v2.19.0
 
       - name: unit test
         run: ginkgo -r --randomize-all
