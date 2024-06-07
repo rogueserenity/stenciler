@@ -22,30 +22,26 @@
 						88
 					]
 				},
-				"cucumberautocomplete.steps": "features/steps/*.py",
-				"cucumberautocomplete.syncfeatures": "features/*.feature",
-				"cucumberautocomplete.strictGherkinCompletion": true,
-				"cucumberautocomplete.strictGherkinValidation": true,
 				"dotfiles.repository": "rogueserenity/stenciler-ohmyzsh-custom",
 				"dotfiles.targetPath": "~/.ohmyzsh-custom",
 				"dotfiles.installCommand": "bootstrap"
 			},
 			"extensions": [
-				"alexkrechik.cucumberautocomplete",
 				"ms-azuretools.vscode-docker",
 				"ms-python.black-formatter",
 				"ms-python.pylint",
-				"joselitofilho.ginkgotestexplorer",
-				"github.copilot",
-				"github.vscode-github-actions",
 				"github.copilot",
 				"github.copilot-chat",
+				"github.vscode-github-actions",
 				"github.vscode-pull-request-github",
 				"golang.go",
-				"yzhang.markdown-all-in-one",
-				"davidanson.vscode-markdownlint",
 				"bmalehorn.shell-syntax",
-				"vivaxy.vscode-conventional-commits"
+				"davidanson.vscode-markdownlint",
+				"jimasp.behave-vsc",
+				"joselitofilho.ginkgotestexplorer",
+				"tamasfe.even-better-toml",
+				"vivaxy.vscode-conventional-commits",
+				"yzhang.markdown-all-in-one"
 			]
 		}
 	},
