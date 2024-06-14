@@ -5,6 +5,7 @@
 		"VIRTUAL_ENV_DISABLE_PROMPT": "1"
 	},
 	"features": {
+		"ghcr.io/devcontainers-contrib/features/poetry:2": {},
 		"ghcr.io/devcontainers/features/go:1": {
 			"version": "1.22",
 			"golangciLintVersion": "1.59.0"
@@ -56,6 +57,7 @@
 		"goreleaser": "go install github.com/goreleaser/goreleaser@v1.26.2",
 		"ginkgo": "go install github.com/onsi/ginkgo/v2/ginkgo@v2.19.0",
 		"mockery": "go install github.com/vektra/mockery/v2@v2.43.1",
-		"cobra-cli": "go install github.com/spf13/cobra-cli@v1.3.0"
+		"cobra-cli": "go install github.com/spf13/cobra-cli@v1.3.0",
+		"poetry": "poetry config virtualenvs.in-project true && poetry install"
 	}
 }
