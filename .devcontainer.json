@@ -1,6 +1,9 @@
 {
 	"name": "Stenciler Development",
 	"image": "mcr.microsoft.com/devcontainers/go:1.22",
+	"containerEnv": {
+		"VIRTUAL_ENV_DISABLE_PROMPT": "1"
+	},
 	"features": {
 		"ghcr.io/devcontainers/features/python:1": {
 			"version": "3.12",
@@ -10,6 +13,9 @@
 	"customizations": {
 		"vscode": {
 			"settings": {
+				"editor.rulers": [
+					120
+				],
 				"terminal.integrated.defaultProfile.linux": "zsh",
 				"terminal.integrated.profiles.linux": {
 					"zsh": {
@@ -17,6 +23,7 @@
 					}
 				},
 				"[python]": {
+					"defaultInterpreterPath": "./.venv/bin/python",
 					"editor.defaultFormatter": "ms-python.black-formatter",
 					"editor.rulers": [
 						88
