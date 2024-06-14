@@ -1,13 +1,13 @@
 {
 	"name": "Stenciler Development",
-	"image": "mcr.microsoft.com/devcontainers/go:1.22",
+	"image": "mcr.microsoft.com/devcontainers/python:3.12",
 	"containerEnv": {
 		"VIRTUAL_ENV_DISABLE_PROMPT": "1"
 	},
 	"features": {
-		"ghcr.io/devcontainers/features/python:1": {
-			"version": "3.12",
-			"toolsToInstall": "black,poetry,pylint"
+		"ghcr.io/devcontainers/features/go:1": {
+			"version": "1.22",
+			"golangciLintVersion": "1.59.0"
 		}
 	},
 	"customizations": {
@@ -53,7 +53,6 @@
 		}
 	},
 	"onCreateCommand": {
-		"golangci-lint": "go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.59.0",
 		"goreleaser": "go install github.com/goreleaser/goreleaser@v1.26.2",
 		"ginkgo": "go install github.com/onsi/ginkgo/v2/ginkgo@v2.19.0",
 		"mockery": "go install github.com/vektra/mockery/v2@v2.43.1",
