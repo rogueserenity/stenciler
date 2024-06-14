@@ -17,6 +17,7 @@
 				"editor.rulers": [
 					120
 				],
+				"files.insertFinalNewline": true,
 				"terminal.integrated.defaultProfile.linux": "zsh",
 				"terminal.integrated.profiles.linux": {
 					"zsh": {
