@@ -66,6 +66,7 @@
 		}
 	},
 	"onCreateCommand": {
+		"commitlint": "go install github.com/conventionalcommit/commitlint@v0.10.1",
 		"goreleaser": "go install github.com/goreleaser/goreleaser/v2@v2.0.1",
 		"ginkgo": "go install github.com/onsi/ginkgo/v2/ginkgo@v2.19.0",
 		"mockery": "go install github.com/vektra/mockery/v2@v2.43.1",
