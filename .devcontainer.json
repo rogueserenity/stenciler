@@ -14,6 +14,9 @@
 	"customizations": {
 		"vscode": {
 			"settings": {
+				"editor.formatOnSave": true,
+				"editor.formatOnType": true,
+				"editor.formatOnPaste": true,
 				"editor.rulers": [
 					120
 				],
@@ -33,7 +36,15 @@
 				},
 				"dotfiles.repository": "rogueserenity/stenciler-ohmyzsh-custom",
 				"dotfiles.targetPath": "~/.ohmyzsh-custom",
-				"dotfiles.installCommand": "bootstrap"
+				"dotfiles.installCommand": "bootstrap",
+				"go.toolsManagement.autoUpdate": true,
+				"go.gopath": "/go",
+				"go.survey.prompt": false,
+				"go.lintTool": "golangci-lint",
+				"go.lintFlags": [
+					"--fast"
+				],
+				"go.formatTool": "gofmt"
 			},
 			"extensions": [
 				"ms-azuretools.vscode-docker",
@@ -55,7 +66,7 @@
 		}
 	},
 	"onCreateCommand": {
-		"goreleaser": "go install github.com/goreleaser/goreleaser@v1.26.2",
+		"goreleaser": "go install github.com/goreleaser/goreleaser/v2@v2.0.1",
 		"ginkgo": "go install github.com/onsi/ginkgo/v2/ginkgo@v2.19.0",
 		"mockery": "go install github.com/vektra/mockery/v2@v2.43.1",
 		"cobra-cli": "go install github.com/spf13/cobra-cli@v1.3.0",
