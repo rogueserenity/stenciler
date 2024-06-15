@@ -92,6 +92,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
+    needs: [lint, unit-test, functional-test]
     steps:
       - name: checkout code
         uses: actions/checkout@v4
