@@ -106,4 +106,4 @@ jobs:
       - name: semantic-release
         uses: ahmadnassri/action-semantic-release@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.STENCILER_RELEASE_TOKEN }}
