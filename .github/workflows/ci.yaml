@@ -93,6 +93,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     needs: [lint, unit-test, functional-test]
+    permissions:
+      contents: write
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -104,4 +106,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          branches: main
           dry: true
