@@ -16,6 +16,9 @@ jobs:
       - name: checkout code
         uses: actions/checkout@v4
 
+      - name: lint commit messages
+        uses: opensource-nepal/commitlint@v1
+
       - name: setup go
         uses: actions/setup-go@v5
         with:
