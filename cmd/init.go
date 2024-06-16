@@ -83,9 +83,9 @@ func doInit(repoURL string) {
 	}
 
 	localConfig := &config.Config{
-		Templates: []config.Template{selectTemplate(cfg)},
+		Templates: []*config.Template{selectTemplate(cfg)},
 	}
-	template := &localConfig.Templates[0]
+	template := localConfig.Templates[0]
 	template.Repository = repoURL
 
 	err = template.Validate(repoDir)
@@ -98,8 +98,8 @@ func doInit(repoURL string) {
 	initialWrite(localConfig)
 }
 
-func selectTemplate(cfg *config.Config) config.Template {
-	var templateMap = make(map[string]config.Template)
+func selectTemplate(cfg *config.Config) *config.Template {
+	var templateMap = make(map[string]*config.Template)
 	for _, t := range cfg.Templates {
 		templateMap[t.Directory] = t
 	}
@@ -129,10 +129,10 @@ func selectTemplate(cfg *config.Config) config.Template {
 		}
 		d = strings.TrimSpace(d)
 		if t, ok := templateMap[d]; ok {
-			template = &t
+			template = t
 		}
 	}
-	return *template
+	return template
 }
 
 func printPrompt(param config.Param) {
@@ -178,7 +178,7 @@ func initialWrite(localConfig *config.Config) {
 		cobra.CheckErr(err)
 	}
 
-	template := &localConfig.Templates[0]
+	template := localConfig.Templates[0]
 
 	err = template.ExecuteHooks(repoDir, config.PreInitHook)
 	if err != nil {

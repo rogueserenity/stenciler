@@ -112,7 +112,7 @@ templates:
 		Context("with simple config", func() {
 			BeforeEach(func() {
 				cfg = &config.Config{
-					Templates: []config.Template{
+					Templates: []*config.Template{
 						{
 							Repository: "https://github.com/rogueserenity/stenciler-test",
 							Directory:  "test",
@@ -137,7 +137,7 @@ templates:
 		Context("with full config", func() {
 			BeforeEach(func() {
 				cfg = &config.Config{
-					Templates: []config.Template{
+					Templates: []*config.Template{
 						{
 							Repository: "https://github.com/rogueserenity/stenciler-test",
 							Directory:  "test",

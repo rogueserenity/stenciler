@@ -45,7 +45,7 @@ func doUpdate() {
 	slog.Debug("config",
 		slog.Any("config", cfg),
 	)
-	template := &cfg.Templates[0]
+	template := cfg.Templates[0]
 
 	if len(repoDir) == 0 {
 		repoDir, err = git.Clone(template.Repository, authToken)
