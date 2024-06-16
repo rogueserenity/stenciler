@@ -11,7 +11,7 @@ import (
 	"github.com/rogueserenity/stenciler/prompt"
 )
 
-var _ = Describe("SelectTemplate", func() {
+var _ = Describe("SelectTemplateWithInOut", func() {
 	var (
 		templateDir string
 		cfg         *config.Config

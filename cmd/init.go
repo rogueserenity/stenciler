@@ -1,12 +1,9 @@
 package cmd
 
 import (
-	"bufio"
-	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -97,45 +94,12 @@ func doInit(repoURL string) {
 		cobra.CheckErr(err)
 	}
 
-	promptForParamValues(template)
-
-	initialWrite(localConfig)
-}
-
-func printPrompt(param config.Param) {
-	fmt.Print(param.Prompt)
-	if len(param.Default) > 0 {
-		fmt.Printf(" [%s]", param.Default)
-	}
-	fmt.Print(": ")
-}
-
-func readPromptResponse() string {
-	reader := bufio.NewReader(os.Stdin)
-	value, err := reader.ReadString('\n')
+	err = prompt.ForParamValues(template, repoDir)
 	if err != nil {
 		cobra.CheckErr(err)
 	}
-	return strings.TrimSpace(value)
-}
 
-func promptForParamValues(template *config.Template) {
-	for _, p := range template.Params {
-		if len(p.Prompt) == 0 {
-			continue
-		}
-
-		printPrompt(*p)
-		p.Value = readPromptResponse()
-		if len(p.Value) == 0 {
-			p.Value = p.Default
-		}
-
-		err := p.Validate(repoDir)
-		if err != nil {
-			cobra.CheckErr(err)
-		}
-	}
+	initialWrite(localConfig)
 }
 
 func initialWrite(localConfig *config.Config) {
