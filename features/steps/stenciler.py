@@ -64,3 +64,30 @@ def step_impl(
                 break
 
     assert stenciler_init.returncode == 0
+
+
+@when("I run stenciler update in the current directory")
+def step_impl(
+    context: Context,
+):
+    stenciler = os.path.join(os.getcwd(), "stenciler")
+    command = [stenciler, "update"]
+
+    if context.auth_token is not None:
+        command.append("-t")
+        command.append(context.auth_token)
+
+    if context.input_dir is not None:
+        command.append("-r")
+        command.append(context.input_dir.name)
+
+    stenciler_init = subprocess.run(
+        command,
+        cwd=context.output_dir.name,
+        check=False,
+        text=True,
+    )
+
+    print("STDOUT:", stenciler_init.stdout)
+    print("STDERR:", stenciler_init.stderr)
+    assert stenciler_init.returncode == 0

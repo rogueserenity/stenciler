@@ -14,6 +14,7 @@ def verify_same(dcmp):
 
 
 @then("I see the current directory initialized with the template data")
+@then("I see the current directory updated with the template data")
 def step_impl(
     context: Context,
 ):
