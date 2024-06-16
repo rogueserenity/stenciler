@@ -64,3 +64,4 @@ linters-settings:
       - name: unhandled-error
         arguments:
           - "fmt.Print.*"
+          - "fmt.Fprint.*"
