@@ -1,4 +1,4 @@
-@remote
+@remote @init
 Feature: Cloning a repository
 
   Scenario: Cloning a public repository from GitHub using HTTPS
