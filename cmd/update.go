@@ -3,12 +3,14 @@ package cmd
 import (
 	"log/slog"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 
 	"github.com/rogueserenity/stenciler/config"
 	"github.com/rogueserenity/stenciler/files"
 	"github.com/rogueserenity/stenciler/git"
+	"github.com/rogueserenity/stenciler/prompt"
 )
 
 // Command represents the init command.
@@ -32,6 +34,23 @@ func doUpdate() {
 		slog.Bool("authTokenProvided", len(authToken) > 0),
 	)
 
+	localTemplate := getLocalTemplateConfig()
+
+	cloneRepo(localTemplate.Repository)
+
+	repoTemplate := getRepoTemplateConfig(localTemplate.Directory)
+
+	mergedTemplate := config.Merge(repoTemplate, localTemplate)
+
+	err := mergedTemplate.Validate(repoDir)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+
+	updateWrite(mergedTemplate)
+}
+
+func getLocalTemplateConfig() *config.Template {
 	cfgFile := configFileName
 	slog.Debug("config file path",
 		slog.String("cfgFile", cfgFile),
@@ -45,10 +64,35 @@ func doUpdate() {
 	slog.Debug("config",
 		slog.Any("config", cfg),
 	)
-	template := cfg.Templates[0]
+	return cfg.Templates[0]
+}
 
+func getRepoTemplateConfig(templateDir string) *config.Template {
+	cfgFile := filepath.Join(repoDir, configFileName)
+	slog.Debug("config file path",
+		slog.String("cfgFile", cfgFile),
+		slog.String("repoDir", repoDir),
+		slog.String("configFileName", configFileName),
+	)
+	cfg, err := config.ReadFromFile(cfgFile)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+	slog.Debug("config",
+		slog.Any("config", cfg),
+	)
+
+	template, err := prompt.SelectTemplate(templateDir, cfg)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+
+	return template
+}
+
+func cloneRepo(repoURL string) {
 	if len(repoDir) == 0 {
-		repoDir, err = git.Clone(template.Repository, authToken)
+		repoDir, err := git.Clone(repoURL, authToken)
 		if err != nil {
 			cobra.CheckErr(err)
 		}
@@ -57,17 +101,19 @@ func doUpdate() {
 			slog.String("repoDir", repoDir),
 		)
 	}
+}
 
-	err = template.Validate(repoDir)
+func updateWrite(template *config.Template) {
+	localConfig := &config.Config{
+		Templates: []*config.Template{template},
+	}
+	slog.Debug("writing config file", slog.Any("localConfig", localConfig))
+	err := localConfig.WriteToFile(configFileName)
 	if err != nil {
 		cobra.CheckErr(err)
 	}
 
-	updateWrite(template)
-}
-
-func updateWrite(template *config.Template) {
-	err := template.ExecuteHooks(repoDir, config.PreUpdateHook)
+	err = template.ExecuteHooks(repoDir, config.PreUpdateHook)
 	if err != nil {
 		cobra.CheckErr(err)
 	}
