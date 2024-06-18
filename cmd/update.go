@@ -47,6 +47,11 @@ func doUpdate() {
 		cobra.CheckErr(err)
 	}
 
+	err = prompt.ForParamValues(mergedTemplate, repoDir)
+	if err != nil {
+		cobra.CheckErr(err)
+	}
+
 	updateWrite(mergedTemplate)
 }
 
