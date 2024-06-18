@@ -37,7 +37,7 @@ def step_impl(
         command.append("-r")
         command.append(context.input_dir.name)
 
-    stenciler_init = subprocess.Popen(  # pylint: disable=R1732
+    init = subprocess.Popen(  # pylint: disable=R1732
         command,
         cwd=context.output_dir.name,
         text=True,
@@ -48,7 +48,7 @@ def step_impl(
     )
 
     out_queue = Queue()
-    out_thread = Thread(target=enqueue_output, args=(stenciler_init.stdout, out_queue))
+    out_thread = Thread(target=enqueue_output, args=(init.stdout, out_queue))
     out_thread.daemon = True
     out_thread.start()
 
@@ -58,12 +58,12 @@ def step_impl(
             print(line)
             value = context.prompts[line]
             print(value)
-            stenciler_init.stdin.write(value + "\n")
+            init.stdin.write(value + "\n")
         except Empty:
-            if stenciler_init.poll() is not None:
+            if init.poll() is not None:
                 break
 
-    assert stenciler_init.returncode == 0
+    assert init.returncode == 0
 
 
 @when("I run stenciler update in the current directory")
@@ -81,13 +81,30 @@ def step_impl(
         command.append("-r")
         command.append(context.input_dir.name)
 
-    stenciler_init = subprocess.run(
+    update = subprocess.Popen(  # pylint: disable=R1732
         command,
         cwd=context.output_dir.name,
-        check=False,
         text=True,
+        bufsize=0,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
 
-    print("STDOUT:", stenciler_init.stdout)
-    print("STDERR:", stenciler_init.stderr)
-    assert stenciler_init.returncode == 0
+    out_queue = Queue()
+    out_thread = Thread(target=enqueue_output, args=(update.stdout, out_queue))
+    out_thread.daemon = True
+    out_thread.start()
+
+    while True:
+        try:
+            line = out_queue.get_nowait()
+            print(line)
+            value = context.prompts[line]
+            print(value)
+            update.stdin.write(value + "\n")
+        except Empty:
+            if update.poll() is not None:
+                break
+
+    assert update.returncode == 0

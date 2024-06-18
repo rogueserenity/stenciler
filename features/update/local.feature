@@ -30,3 +30,15 @@ Feature: Local Template Processing
     Given I have a local template with multiple post-update hooks
     When I run stenciler update in the current directory
     Then I see the current directory updated with the template data
+
+  @prompt
+  Scenario: Processing a template update with a prompt but already has a value
+    Given I have a local updated template with existing values
+    When I run stenciler update in the current directory
+    Then I see the current directory updated with the template data
+
+  @prompt
+  Scenario: Processing a template update with a prompt
+    Given I have a local updated template with a new param
+    When I run stenciler update in the current directory
+    Then I see the current directory updated with the template data
