@@ -37,7 +37,7 @@ def step_impl(
         command.append("-r")
         command.append(context.input_dir.name)
 
-    stenciler_init = subprocess.Popen(  # pylint: disable=R1732
+    init = subprocess.Popen(  # pylint: disable=R1732
         command,
         cwd=context.output_dir.name,
         text=True,
@@ -48,7 +48,7 @@ def step_impl(
     )
 
     out_queue = Queue()
-    out_thread = Thread(target=enqueue_output, args=(stenciler_init.stdout, out_queue))
+    out_thread = Thread(target=enqueue_output, args=(init.stdout, out_queue))
     out_thread.daemon = True
     out_thread.start()
 
@@ -58,9 +58,53 @@ def step_impl(
             print(line)
             value = context.prompts[line]
             print(value)
-            stenciler_init.stdin.write(value + "\n")
+            init.stdin.write(value + "\n")
         except Empty:
-            if stenciler_init.poll() is not None:
+            if init.poll() is not None:
                 break
 
-    assert stenciler_init.returncode == 0
+    assert init.returncode == 0
+
+
+@when("I run stenciler update in the current directory")
+def step_impl(
+    context: Context,
+):
+    stenciler = os.path.join(os.getcwd(), "stenciler")
+    command = [stenciler, "update"]
+
+    if context.auth_token is not None:
+        command.append("-t")
+        command.append(context.auth_token)
+
+    if context.input_dir is not None:
+        command.append("-r")
+        command.append(context.input_dir.name)
+
+    update = subprocess.Popen(  # pylint: disable=R1732
+        command,
+        cwd=context.output_dir.name,
+        text=True,
+        bufsize=0,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+
+    out_queue = Queue()
+    out_thread = Thread(target=enqueue_output, args=(update.stdout, out_queue))
+    out_thread.daemon = True
+    out_thread.start()
+
+    while True:
+        try:
+            line = out_queue.get_nowait()
+            print(line)
+            value = context.prompts[line]
+            print(value)
+            update.stdin.write(value + "\n")
+        except Empty:
+            if update.poll() is not None:
+                break
+
+    assert update.returncode == 0

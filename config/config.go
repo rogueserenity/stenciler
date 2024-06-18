@@ -85,7 +85,7 @@ type Template struct {
 
 // Config holds the contents of a configuration file.
 type Config struct {
-	Templates []Template `yaml:"templates,omitempty"`
+	Templates []*Template `yaml:"templates,omitempty"`
 }
 
 // ReadFromFile attempts to read a config from the specified path.

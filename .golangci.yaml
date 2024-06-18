@@ -35,6 +35,11 @@ linters:
     - revive
 
 linters-settings:
+  errcheck:
+    exclude-functions:
+      - fmt.Fprintln
+      - fmt.Fprintf
+      - fmt.Fprint
   ginkgolinter:
     paths:
       - ./...
@@ -64,3 +69,4 @@ linters-settings:
       - name: unhandled-error
         arguments:
           - "fmt.Print.*"
+          - "fmt.Fprint.*"

@@ -1,18 +1,16 @@
 package cmd
 
 import (
-	"bufio"
-	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/rogueserenity/stenciler/config"
 	"github.com/rogueserenity/stenciler/files"
 	"github.com/rogueserenity/stenciler/git"
+	"github.com/rogueserenity/stenciler/prompt"
 )
 
 var (
@@ -82,10 +80,13 @@ func doInit(repoURL string) {
 		cobra.CheckErr("no templates found in config file")
 	}
 
-	localConfig := &config.Config{
-		Templates: []config.Template{selectTemplate(cfg)},
+	template, err := prompt.SelectTemplate(templateDir, cfg)
+	if err != nil {
+		cobra.CheckErr(err)
 	}
-	template := &localConfig.Templates[0]
+	localConfig := &config.Config{
+		Templates: []*config.Template{template},
+	}
 	template.Repository = repoURL
 
 	err = template.Validate(repoDir)
@@ -93,82 +94,12 @@ func doInit(repoURL string) {
 		cobra.CheckErr(err)
 	}
 
-	prompt(template)
-
-	initialWrite(localConfig)
-}
-
-func selectTemplate(cfg *config.Config) config.Template {
-	var templateMap = make(map[string]config.Template)
-	for _, t := range cfg.Templates {
-		templateMap[t.Directory] = t
-	}
-
-	if len(templateDir) > 0 {
-		if t, ok := templateMap[templateDir]; ok {
-			return t
-		}
-		cobra.CheckErr("template name not found in config")
-	}
-
-	if len(cfg.Templates) == 1 {
-		return cfg.Templates[0]
-	}
-
-	var template *config.Template
-	for template == nil {
-		fmt.Println("Available templates:")
-		for _, t := range cfg.Templates {
-			fmt.Println("> ", t.Directory)
-		}
-		fmt.Print("please specify the template directory to use: ")
-		reader := bufio.NewReader(os.Stdin)
-		d, err := reader.ReadString('\n')
-		if err != nil {
-			cobra.CheckErr(err)
-		}
-		d = strings.TrimSpace(d)
-		if t, ok := templateMap[d]; ok {
-			template = &t
-		}
-	}
-	return *template
-}
-
-func printPrompt(param config.Param) {
-	fmt.Print(param.Prompt)
-	if len(param.Default) > 0 {
-		fmt.Printf(" [%s]", param.Default)
-	}
-	fmt.Print(": ")
-}
-
-func readPromptResponse() string {
-	reader := bufio.NewReader(os.Stdin)
-	value, err := reader.ReadString('\n')
+	err = prompt.ForParamValues(template, repoDir)
 	if err != nil {
 		cobra.CheckErr(err)
 	}
-	return strings.TrimSpace(value)
-}
 
-func prompt(template *config.Template) {
-	for _, p := range template.Params {
-		if len(p.Prompt) == 0 {
-			continue
-		}
-
-		printPrompt(*p)
-		p.Value = readPromptResponse()
-		if len(p.Value) == 0 {
-			p.Value = p.Default
-		}
-
-		err := p.Validate(repoDir)
-		if err != nil {
-			cobra.CheckErr(err)
-		}
-	}
+	initialWrite(localConfig)
 }
 
 func initialWrite(localConfig *config.Config) {
@@ -178,7 +109,7 @@ func initialWrite(localConfig *config.Config) {
 		cobra.CheckErr(err)
 	}
 
-	template := &localConfig.Templates[0]
+	template := localConfig.Templates[0]
 
 	err = template.ExecuteHooks(repoDir, config.PreInitHook)
 	if err != nil {

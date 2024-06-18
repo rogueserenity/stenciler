@@ -1,3 +1,4 @@
+@init
 Feature: Local Template Processing
 
   Scenario: Processing a template with contains only raw copy files

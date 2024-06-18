@@ -8,5 +8,9 @@ if ! type commitlint >/dev/null 2>/dev/null; then
     exit 2;
 fi
 
+if ( grep -q "Merge branch" $1 ); then
+    exit 0;
+fi
+
 commitlint lint --message $1
 
