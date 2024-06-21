@@ -5,6 +5,7 @@ go 1.22
 require (
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/go-git/go-git/v5 v5.12.0
+	github.com/iancoleman/strcase v0.3.0
 	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
 	github.com/spf13/cobra v1.8.1

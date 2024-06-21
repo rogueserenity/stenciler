@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/iancoleman/strcase"
 	"gopkg.in/yaml.v3"
 )
 
@@ -204,17 +205,27 @@ func (t *Template) ExecuteHooks(repoDir string, hookClass HookClass) error {
 	}
 
 	for _, hook := range hooks {
-		if err := executeHook(filepath.Join(repoDir, hook)); err != nil {
+		if err := t.executeHook(filepath.Join(repoDir, hook)); err != nil {
 			return err
 		}
 	}
+
 	return nil
 }
 
-func executeHook(hook string) error {
-	err := exec.Command("/bin/sh", hook).Run()
-	if err != nil {
+func (t *Template) executeHook(hook string) error {
+	cmd := exec.Command("/bin/sh", hook)
+
+	env := os.Environ()
+	for _, p := range t.Params {
+		name := strcase.ToScreamingSnake(p.Name)
+		env = append(env, fmt.Sprintf("%s=%s", name, p.Value))
+	}
+	cmd.Env = env
+
+	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("failed to execute hook %s: %w", hook, err)
 	}
+
 	return nil
 }
