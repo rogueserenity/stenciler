@@ -875,3 +875,47 @@ def step_impl(
     }
     with open(context.output_config_file, "w", encoding="utf-8") as f:
         yaml.dump(yaml_data, f)
+
+
+@given("I have a local template with a pre-init hook that uses parameter variables")
+def step_impl(
+    context: Context,
+):
+    context.repository_url = "https://github.com/local/repo"
+    context.template_root_dir = "foo"
+    root = os.path.join(context.input_dir.name, context.template_root_dir)
+    os.makedirs(root, exist_ok=True)
+
+    hooks_dir = os.path.join(context.input_dir.name, "hooks")
+    os.makedirs(hooks_dir, exist_ok=True)
+    hook = os.path.join(hooks_dir, "create_ship.sh")
+    with open(hook, "w", encoding="utf-8") as f:
+        f.write("echo ${STENCILER_CAPTAIN} > ${STENCILER_SHIP}")
+    os.chmod(hook, 0o755)
+
+    yaml_data = {
+        "templates": [
+            {
+                "directory": "foo",
+                "params": [
+                    {
+                        "name": "ship",
+                        "value": "Serenity",
+                    },
+                    {
+                        "name": "captain",
+                        "value": "Malcolm Reynolds",
+                    },
+                ],
+                "pre-init-hooks": [
+                    "hooks/create_ship.sh",
+                ],
+            },
+        ],
+    }
+    with open(context.input_config_file, "w", encoding="utf-8") as f:
+        yaml.dump(yaml_data, f)
+
+    file = os.path.join(context.expected_dir.name, "Serenity")
+    with open(file, "w", encoding="utf-8") as f:
+        f.write("Malcolm Reynolds\n")

@@ -54,3 +54,9 @@ Feature: Local Template Processing
     Given I have a local template with multiple post-init hooks
     When I run stenciler init with the repository URL in an empty directory
     Then I see the current directory initialized with the template data
+
+  @wip
+  Scenario: Ensuring that a template hook is receiving params as environment variables
+    Given I have a local template with a pre-init hook that uses parameter variables
+    When I run stenciler init with the repository URL in an empty directory
+    Then I see the current directory initialized with the template data
