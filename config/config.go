@@ -219,7 +219,7 @@ func (t *Template) executeHook(hook string) error {
 	env := os.Environ()
 	for _, p := range t.Params {
 		name := strcase.ToScreamingSnake(p.Name)
-		env = append(env, fmt.Sprintf("%s=%s", name, p.Value))
+		env = append(env, fmt.Sprintf("STENCILER_%s=%s", name, p.Value))
 	}
 	cmd.Env = env
 
