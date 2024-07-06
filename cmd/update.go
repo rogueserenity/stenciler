@@ -52,6 +52,8 @@ func doUpdate() {
 		cobra.CheckErr(err)
 	}
 
+	mergedTemplate.Update = true
+
 	updateWrite(mergedTemplate)
 }
 
