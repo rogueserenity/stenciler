@@ -57,7 +57,7 @@ type Param struct {
 type Template struct {
 	// Update is true if the current command is update. This is not saved in the config file and is only used during
 	// execution.
-	Update bool
+	Update bool `yaml:"-"`
 	// Repository is the URL of the repository to clone. Required.
 	Repository string `yaml:"repository"`
 	// Directory is the directory at the root of the repository that holds the template data. Required.
