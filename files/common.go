@@ -3,8 +3,12 @@ package files
 import (
 	"fmt"
 	"io/fs"
+	"log/slog"
 	"os"
 	"path/filepath"
+	"slices"
+
+	"github.com/bmatcuk/doublestar/v4"
 )
 
 // ensureDirExists ensures that the directory containing the file at relFilePath exists in destRootPath with the same
@@ -80,4 +84,31 @@ func isRegularFile(srcRootPath, relFilePath string) bool {
 		return false
 	}
 	return srcInfo.Mode().IsRegular()
+}
+
+// createFileList generates a list of files in the specified root that match the list of glob patterns.
+func createFileList(root string, globPatterns []string) ([]string, error) {
+	var copyList []string
+	srcRoot := os.DirFS(root)
+	for _, rawGlob := range globPatterns {
+		rawFiles, err := doublestar.Glob(srcRoot, rawGlob)
+		if err != nil {
+			return nil, fmt.Errorf("failed to glob %s: %w", rawGlob, err)
+		}
+		copyList = append(copyList, rawFiles...)
+	}
+
+	slog.Debug("copy list", slog.Any("files", copyList))
+
+	return copyList, nil
+}
+
+func removeFromFileList(fileList, removeList []string) []string {
+	var resultList []string
+	for _, f := range fileList {
+		if !slices.Contains(removeList, f) {
+			resultList = append(resultList, f)
+		}
+	}
+	return resultList
 }

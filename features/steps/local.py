@@ -919,3 +919,56 @@ def step_impl(
     file = os.path.join(context.expected_dir.name, "Serenity")
     with open(file, "w", encoding="utf-8") as f:
         f.write("Malcolm Reynolds\n")
+
+
+@given("I have a local updated template with init-only files")
+def step_impl(
+    context: Context,
+):
+    context.repository_url = "https://github.com/local/repo"
+    context.template_root_dir = "foo"
+    root = os.path.join(context.input_dir.name, context.template_root_dir)
+    leaf_dir1 = os.path.join(root, "bar", "baz")
+    os.makedirs(leaf_dir1, exist_ok=True)
+    with open(os.path.join(leaf_dir1, "file.txt"), "w", encoding="utf-8") as f:
+        f.write("Rogue")
+    with open(os.path.join(leaf_dir1, "file2.txt"), "w", encoding="utf-8") as f:
+        f.write("Rogue2")
+    with open(os.path.join(leaf_dir1, "test.txt"), "w", encoding="utf-8") as f:
+        f.write("Serenity")
+
+    yaml_data = {
+        "templates": [
+            {
+                "directory": "foo",
+                "init-only": [
+                    "**/file.txt",
+                    "**/file2.txt",
+                ],
+                "raw-copy": [
+                    "**/file2.txt",
+                ],
+            },
+        ],
+    }
+    with open(context.input_config_file, "w", encoding="utf-8") as f:
+        yaml.dump(yaml_data, f)
+
+    leaf_dir1 = os.path.join(context.expected_dir.name, "bar", "baz")
+    os.makedirs(leaf_dir1, exist_ok=True)
+    with open(os.path.join(leaf_dir1, "test.txt"), "w", encoding="utf-8") as f:
+        f.write("Serenity")
+
+    yaml_data = {
+        "templates": [
+            {
+                "directory": "foo",
+                "init-only": [
+                    "**/file.txt",
+                    "**/file2.txt",
+                ],
+            },
+        ],
+    }
+    with open(context.output_config_file, "w", encoding="utf-8") as f:
+        yaml.dump(yaml_data, f)
