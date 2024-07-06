@@ -63,6 +63,8 @@ def step_impl(
             if init.poll() is not None:
                 break
 
+    print("STDOUT: ", init.stdout.read())
+    print("STDERR: ", init.stderr.read())
     assert init.returncode == 0
 
 
@@ -107,4 +109,6 @@ def step_impl(
             if update.poll() is not None:
                 break
 
+    print("STDOUT: ", update.stdout.read())
+    print("STDERR: ", update.stderr.read())
     assert update.returncode == 0

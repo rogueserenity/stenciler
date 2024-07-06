@@ -7,8 +7,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/bmatcuk/doublestar/v4"
-
 	"github.com/rogueserenity/stenciler/config"
 )
 
@@ -21,9 +19,17 @@ func CopyRaw(repoDir string, template *config.Template) error {
 		return fmt.Errorf("failed to get current working directory: %w", err)
 	}
 
-	copyList, err := generateRawCopyList(srcRootPath, template.RawCopyPaths)
+	copyList, err := createFileList(srcRootPath, template.RawCopyPaths)
 	if err != nil {
 		return fmt.Errorf("failed to generate copy list: %w", err)
+	}
+
+	if template.Update {
+		initOnlyList, err := createFileList(srcRootPath, template.InitOnlyPaths)
+		if err != nil {
+			return fmt.Errorf("failed to generate init-only list: %w", err)
+		}
+		copyList = removeFromFileList(copyList, initOnlyList)
 	}
 
 	for _, f := range copyList {
@@ -34,23 +40,6 @@ func CopyRaw(repoDir string, template *config.Template) error {
 	}
 
 	return nil
-}
-
-// generateRawCopyList generates a list of files to copy from the template directory without template processing.
-func generateRawCopyList(srcRootPath string, rawCopyPaths []string) ([]string, error) {
-	var copyList []string
-	srcRoot := os.DirFS(srcRootPath)
-	for _, rawGlob := range rawCopyPaths {
-		rawFiles, err := doublestar.Glob(srcRoot, rawGlob)
-		if err != nil {
-			return nil, fmt.Errorf("failed to glob %s: %w", rawGlob, err)
-		}
-		copyList = append(copyList, rawFiles...)
-	}
-
-	slog.Debug("copy list", slog.Any("files", copyList))
-
-	return copyList, nil
 }
 
 // copyRawFile copies the file at relFilePath in srcRootPath to destRootPath. It skips any non-regular files and will

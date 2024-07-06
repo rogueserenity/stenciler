@@ -26,9 +26,18 @@ func CopyTemplated(repoDir string, tmplate *config.Template) error {
 		params[p.Name] = p.Value
 	}
 
-	fileList, err := generateFileList(srcRootPath, tmplate)
+	fileList, err := createSourceFileList(srcRootPath)
 	if err != nil {
 		return fmt.Errorf("failed to generate file list: %w", err)
+	}
+	fileList = removeFromFileList(fileList, tmplate.RawCopyPaths)
+
+	if tmplate.Update {
+		initOnlyList, err := createFileList(srcRootPath, tmplate.InitOnlyPaths)
+		if err != nil {
+			return fmt.Errorf("failed to generate init-only list: %w", err)
+		}
+		fileList = removeFromFileList(fileList, initOnlyList)
 	}
 
 	for _, f := range fileList {
@@ -41,26 +50,13 @@ func CopyTemplated(repoDir string, tmplate *config.Template) error {
 	return nil
 }
 
-func generateFileList(srcRootPath string, tmplate *config.Template) ([]string, error) {
-	var fileList []string
-	srcRoot := os.DirFS(srcRootPath)
+func createSourceFileList(root string) ([]string, error) {
+	srcRoot := os.DirFS(root)
 	allFiles, err := doublestar.Glob(srcRoot, "**")
 	if err != nil {
 		return nil, fmt.Errorf("failed to glob all files: %w", err)
 	}
-	for _, file := range allFiles {
-		isRawCopyFile, err := isRawCopyFile(file, tmplate.RawCopyPaths)
-		if err != nil {
-			return nil, fmt.Errorf("failed to check if %s is a raw copy file: %w", file, err)
-		}
-		if isRawCopyFile {
-			continue
-		}
-
-		fileList = append(fileList, file)
-	}
-
-	return fileList, nil
+	return allFiles, nil
 }
 
 func copyTemplatedFile(srcRootPath, destRootPath, relFilePath string, params map[string]string) error {
@@ -102,17 +98,4 @@ func copyTemplatedFile(srcRootPath, destRootPath, relFilePath string, params map
 	}
 
 	return nil
-}
-
-func isRawCopyFile(filePath string, rawCopyPaths []string) (bool, error) {
-	for _, rawGlob := range rawCopyPaths {
-		match, err := doublestar.Match(rawGlob, filePath)
-		if err != nil {
-			return false, fmt.Errorf("failed to match %s: %w", rawGlob, err)
-		}
-		if match {
-			return true, nil
-		}
-	}
-	return false, nil
 }
