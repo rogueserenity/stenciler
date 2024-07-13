@@ -6,7 +6,7 @@ be used in [GitHub Codespaces](https://docs.github.com/en/codespaces).
 
 ## Commiting
 
-All commit messages should meet the requirements of [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+All commit messages must meet the requirements of [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
 A [VS Code plugin](https://marketplace.visualstudio.com/items?itemName=vivaxy.vscode-conventional-commits) is included
 in the Dev Container to make it easier to complete this action.
 
@@ -28,7 +28,7 @@ gol
 
 ### Unit Tests
 
-Unit testing is done using the [Ginkgo](https://onsi.github.io/ginkgo/) Framework along with
+Unit testing is developed using the [Ginkgo](https://onsi.github.io/ginkgo/) Framework along with
 [Gomega](https://onsi.github.io/gomega/) matchers.
 
 #### Generating Mocks
@@ -50,6 +50,9 @@ gou
 ```
 
 ### Functional Tests
+
+Functional tests are developed in python using [behave](https://github.com/behave/behave). The alias below supports
+passing arguments to behave like `-m` and `-w`.
 
 ```shell
 ftest
