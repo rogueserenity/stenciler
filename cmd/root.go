@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/carlmjohnson/versioninfo"
 	"github.com/spf13/cobra"
 )
 
@@ -34,6 +35,15 @@ that repo up to date with changes from the repository`,
 		}
 		return nil
 	},
+}
+
+// SetReleaseVersion sets the version of the application.
+func SetReleaseVersion(version string) {
+	if len(version) > 0 {
+		rootCmd.Version = version
+	} else {
+		rootCmd.Version = versioninfo.Version
+	}
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

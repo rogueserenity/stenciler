@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 	"path/filepath"
@@ -65,8 +66,7 @@ func getLocalTemplateConfig() *config.Template {
 	slog.Debug("local config file path", slog.String("path", cfgFile))
 	cfg, err := config.ReadFromFile(cfgFile)
 	if err != nil {
-		slog.Error("failed to read config file", slog.Any("error", err))
-		cobra.CheckErr(err)
+		cobra.CheckErr(fmt.Errorf("failed to read config file: %w", err))
 	}
 	slog.Debug("local config", slog.Any("config", *cfg))
 	return cfg.Templates[0]
