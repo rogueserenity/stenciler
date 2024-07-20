@@ -12,8 +12,6 @@ import (
 // these values are automagically populated by Goreleaser.
 var (
 	version string
-	commit  string
-	date    string
 )
 
 func main() {
