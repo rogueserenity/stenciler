@@ -9,6 +9,13 @@ import (
 	"github.com/rogueserenity/stenciler/cmd"
 )
 
+// these values are automagically populated by Goreleaser.
+var (
+	version string
+	commit  string
+	date    string
+)
+
 func main() {
 	logLevel := os.Getenv("STENCILER_LOG_LEVEL")
 	var level slog.Level
@@ -26,5 +33,6 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{Level: level}))
 	slog.SetDefault(logger)
 
+	cmd.SetReleaseVersion(version)
 	cmd.Execute()
 }
