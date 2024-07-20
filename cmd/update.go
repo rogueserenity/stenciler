@@ -36,7 +36,10 @@ func doUpdate() {
 
 	localTemplate := getLocalTemplateConfig()
 
-	cloneRepo(localTemplate.Repository)
+	if len(repoDir) == 0 {
+		repoDir = cloneRepo(localTemplate.Repository)
+		defer os.RemoveAll(repoDir)
+	}
 
 	repoTemplate := getRepoTemplateConfig(localTemplate.Directory)
 
@@ -59,35 +62,24 @@ func doUpdate() {
 
 func getLocalTemplateConfig() *config.Template {
 	cfgFile := configFileName
-	slog.Debug("config file path",
-		slog.String("cfgFile", cfgFile),
-		slog.String("repoDir", repoDir),
-	)
+	slog.Debug("local config file path", slog.String("path", cfgFile))
 	cfg, err := config.ReadFromFile(cfgFile)
 	if err != nil {
 		slog.Error("failed to read config file", slog.Any("error", err))
 		cobra.CheckErr(err)
 	}
-	slog.Debug("config",
-		slog.Any("config", cfg),
-	)
+	slog.Debug("local config", slog.Any("config", *cfg))
 	return cfg.Templates[0]
 }
 
 func getRepoTemplateConfig(templateDir string) *config.Template {
 	cfgFile := filepath.Join(repoDir, configFileName)
-	slog.Debug("config file path",
-		slog.String("cfgFile", cfgFile),
-		slog.String("repoDir", repoDir),
-		slog.String("configFileName", configFileName),
-	)
+	slog.Debug("repo config file path", slog.String("path", cfgFile))
 	cfg, err := config.ReadFromFile(cfgFile)
 	if err != nil {
 		cobra.CheckErr(err)
 	}
-	slog.Debug("config",
-		slog.Any("config", cfg),
-	)
+	slog.Debug("repo config", slog.Any("config", *cfg))
 
 	template, err := prompt.SelectTemplate(templateDir, cfg)
 	if err != nil {
@@ -97,24 +89,20 @@ func getRepoTemplateConfig(templateDir string) *config.Template {
 	return template
 }
 
-func cloneRepo(repoURL string) {
-	if len(repoDir) == 0 {
-		repoDir, err := git.Clone(repoURL, authToken)
-		if err != nil {
-			cobra.CheckErr(err)
-		}
-		defer os.RemoveAll(repoDir)
-		slog.Debug("cloned repository",
-			slog.String("repoDir", repoDir),
-		)
+func cloneRepo(repoURL string) string {
+	cloneDir, err := git.Clone(repoURL, authToken)
+	if err != nil {
+		cobra.CheckErr(err)
 	}
+	slog.Debug("cloned repository", slog.String("directory", cloneDir))
+	return cloneDir
 }
 
 func updateWrite(template *config.Template) {
 	localConfig := &config.Config{
 		Templates: []*config.Template{template},
 	}
-	slog.Debug("writing config file", slog.Any("localConfig", localConfig))
+	slog.Debug("writing merged config file", slog.Any("config", localConfig))
 	err := localConfig.WriteToFile(configFileName)
 	if err != nil {
 		cobra.CheckErr(err)
