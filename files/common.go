@@ -98,7 +98,7 @@ func createFileList(root string, globPatterns []string) ([]string, error) {
 		copyList = append(copyList, rawFiles...)
 	}
 
-	slog.Debug("copy list", slog.Any("files", copyList))
+	slog.Debug("file list", slog.Any("files", copyList), slog.String("root", root), slog.Any("patterns", globPatterns))
 
 	return copyList, nil
 }

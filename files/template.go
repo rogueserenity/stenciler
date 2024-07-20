@@ -2,6 +2,7 @@ package files
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"text/template"
@@ -96,6 +97,11 @@ func copyTemplatedFile(srcRootPath, destRootPath, relFilePath string, params map
 	if err != nil {
 		return fmt.Errorf("failed to execute template: %w", err)
 	}
+
+	slog.Debug("copied templated file",
+		slog.String("src", srcFilePath),
+		slog.String("dest", destFilePath),
+	)
 
 	return nil
 }

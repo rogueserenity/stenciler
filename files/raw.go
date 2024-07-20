@@ -71,7 +71,7 @@ func copyRawFile(srcRootPath, destRootPath, relFilePath string) (int64, error) {
 		return 0, fmt.Errorf("failed to copy %s: %w", relFilePath, err)
 	}
 
-	slog.Debug("copied file",
+	slog.Debug("copied raw file",
 		slog.String("src", srcFile.Name()),
 		slog.String("dest", destFile.Name()),
 	)
