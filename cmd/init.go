@@ -72,9 +72,7 @@ func doInit(repoURL string) {
 		cobra.CheckErr(err)
 	}
 
-	slog.Debug("config",
-		slog.Any("config", cfg),
-	)
+	slog.Debug("config", slog.Any("config", *cfg))
 
 	if len(cfg.Templates) == 0 {
 		cobra.CheckErr("no templates found in config file")

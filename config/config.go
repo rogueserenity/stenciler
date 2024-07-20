@@ -141,16 +141,25 @@ func (c *Config) Write(out io.Writer) error {
 }
 
 // LogValue returns the slog.Value representation of the Config.
-func (c *Config) LogValue() slog.Value {
-	return slog.AnyValue(c.Templates)
+func (c Config) LogValue() slog.Value {
+	templates := make([]Template, 0, len(c.Templates))
+	for _, t := range c.Templates {
+		templates = append(templates, *t)
+	}
+	return slog.AnyValue(templates)
 }
 
 // LogValue returns the slog.Value representation of the Template.
-func (t *Template) LogValue() slog.Value {
+func (t Template) LogValue() slog.Value {
+	params := make([]Param, 0, len(t.Params))
+	for _, p := range t.Params {
+		params = append(params, *p)
+	}
+
 	return slog.GroupValue(
 		slog.String("repository", t.Repository),
 		slog.String("directory", t.Directory),
-		slog.Any("params", t.Params),
+		slog.Any("params", params),
 		slog.Any("init-only", t.InitOnlyPaths),
 		slog.Any("raw-copy", t.RawCopyPaths),
 		slog.Any("pre-init-hooks", t.PreInitHookPaths),
@@ -161,7 +170,7 @@ func (t *Template) LogValue() slog.Value {
 }
 
 // LogValue returns the slog.Value representation of the Param.
-func (p *Param) LogValue() slog.Value {
+func (p Param) LogValue() slog.Value {
 	return slog.GroupValue(
 		slog.String("name", p.Name),
 		slog.String("prompt", p.Prompt),
