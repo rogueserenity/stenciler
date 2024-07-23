@@ -31,7 +31,13 @@ func CopyTemplated(repoDir string, tmplate *config.Template) error {
 	if err != nil {
 		return fmt.Errorf("failed to generate file list: %w", err)
 	}
-	fileList = removeFromFileList(fileList, tmplate.RawCopyPaths)
+
+	rawList, err := createFileList(srcRootPath, tmplate.RawCopyPaths)
+	if err != nil {
+		return fmt.Errorf("failed to generate raw copy file list: %w", err)
+	}
+
+	fileList = removeFromFileList(fileList, rawList)
 
 	if tmplate.Update {
 		initOnlyList, err := createFileList(srcRootPath, tmplate.InitOnlyPaths)
