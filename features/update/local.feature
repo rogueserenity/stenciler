@@ -43,7 +43,6 @@ Feature: Local Template Processing
     When I run stenciler update in the current directory
     Then I see the current directory updated with the template data
 
-  @wip
   Scenario: Init only files are not copied during an update
     Given I have a local updated template with init-only files
     When I run stenciler update in the current directory

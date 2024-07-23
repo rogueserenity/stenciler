@@ -32,7 +32,7 @@ def step_impl(
     with open(os.path.join(leaf_dir1, "file.txt"), "w", encoding="utf-8") as f:
         f.write("Rogue")
     with open(os.path.join(leaf_dir2, "file.txt"), "w", encoding="utf-8") as f:
-        f.write("Serenity")
+        f.write("{{Serenity}}")
 
     yaml_data = {
         "templates": [
