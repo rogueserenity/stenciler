@@ -3,7 +3,7 @@ module github.com/rogueserenity/stenciler
 go 1.22
 
 require (
-	github.com/bmatcuk/doublestar/v4 v4.6.1
+	github.com/bmatcuk/doublestar/v4 v4.7.1
 	github.com/carlmjohnson/versioninfo v0.22.5
 	github.com/go-git/go-git/v5 v5.12.0
 	github.com/iancoleman/strcase v0.3.0
