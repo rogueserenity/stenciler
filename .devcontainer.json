@@ -71,6 +71,7 @@
 		"ginkgo": "go install github.com/onsi/ginkgo/v2/ginkgo@v2.21.1",
 		"mockery": "go install github.com/vektra/mockery/v2@v2.43.1",
 		"cobra-cli": "go install github.com/spf13/cobra-cli@v1.3.0",
-		"poetry": "poetry config virtualenvs.in-project true && poetry install"
+		"poetry": "poetry config virtualenvs.in-project true && poetry install",
+		"git safe dir": "git config --global --add safe.directory /workspaces/stenciler"
 	}
 }
