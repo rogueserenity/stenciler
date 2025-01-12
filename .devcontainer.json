@@ -1,14 +1,14 @@
 {
 	"name": "Stenciler Development",
-	"image": "mcr.microsoft.com/devcontainers/python:3.12",
+	"image": "mcr.microsoft.com/devcontainers/python:3.13",
 	"containerEnv": {
 		"VIRTUAL_ENV_DISABLE_PROMPT": "1"
 	},
 	"features": {
 		"ghcr.io/devcontainers-contrib/features/poetry:2": {},
 		"ghcr.io/devcontainers/features/go:1": {
-			"version": "1.22",
-			"golangciLintVersion": "1.59.0"
+			"version": "1.23",
+			"golangciLintVersion": "1.63.4"
 		}
 	},
 	"customizations": {
