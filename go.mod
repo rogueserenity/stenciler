@@ -5,7 +5,7 @@ go 1.22.0
 toolchain go1.22.8
 
 require (
-	github.com/bmatcuk/doublestar/v4 v4.8.0
+	github.com/bmatcuk/doublestar/v4 v4.8.1
 	github.com/carlmjohnson/versioninfo v0.22.5
 	github.com/go-git/go-git/v5 v5.13.2
 	github.com/iancoleman/strcase v0.3.0
