@@ -40,9 +40,6 @@ linters-settings:
       - fmt.Fprintln
       - fmt.Fprintf
       - fmt.Fprint
-  ginkgolinter:
-    paths:
-      - ./...
   goimports:
     local-prefixes: github.com/rogueserenity/stenciler
   revive:
