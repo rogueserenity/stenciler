@@ -9,7 +9,7 @@ require (
 	github.com/carlmjohnson/versioninfo v0.22.5
 	github.com/go-git/go-git/v5 v5.14.0
 	github.com/iancoleman/strcase v0.3.0
-	github.com/onsi/ginkgo/v2 v2.23.0
+	github.com/onsi/ginkgo/v2 v2.23.3
 	github.com/onsi/gomega v1.36.2
 	github.com/spf13/cobra v1.9.1
 	gopkg.in/yaml.v3 v3.0.1
