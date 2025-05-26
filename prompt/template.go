@@ -2,6 +2,7 @@ package prompt
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -30,7 +31,7 @@ func SelectTemplateWithInOut(
 		if t, ok := templateMap[templateDir]; ok {
 			return t, nil
 		}
-		return nil, fmt.Errorf("template directory not found in config")
+		return nil, errors.New("template directory not found in config")
 	}
 
 	if len(cfg.Templates) == 1 {
