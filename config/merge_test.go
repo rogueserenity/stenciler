@@ -1,17 +1,23 @@
 package config_test
 
 import (
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"testing"
+
+	"github.com/stretchr/testify/suite"
 
 	"github.com/rogueserenity/stenciler/config"
 )
 
-var _ = DescribeTable("Merge", func(repoTemplate, localTemplate, expectedTemplate *config.Template) {
-	mergedTemplate := config.Merge(repoTemplate, localTemplate)
-	Expect(mergedTemplate).To(Equal(expectedTemplate))
-},
-	Entry("repo template has no params", &config.Template{
+type MergeTestSuite struct {
+	suite.Suite
+}
+
+func TestMergeTestSuite(t *testing.T) {
+	suite.Run(t, new(MergeTestSuite))
+}
+
+func (s *MergeTestSuite) TestMergeRepoTemplateWithNoParams() {
+	repo := &config.Template{
 		Directory:           "foo",
 		InitOnlyPaths:       []string{"init1"},
 		RawCopyPaths:        []string{"raw1"},
@@ -19,7 +25,8 @@ var _ = DescribeTable("Merge", func(repoTemplate, localTemplate, expectedTemplat
 		PostInitHookPaths:   []string{"post-init1"},
 		PreUpdateHookPaths:  []string{"pre-update1"},
 		PostUpdateHookPaths: []string{"post-update1"},
-	}, &config.Template{
+	}
+	local := &config.Template{
 		Repository: "https://github.com/owner/repo.git",
 		Directory:  "foo",
 		Params: []*config.Param{
@@ -34,7 +41,8 @@ var _ = DescribeTable("Merge", func(repoTemplate, localTemplate, expectedTemplat
 		PostInitHookPaths:   []string{"post-init2"},
 		PreUpdateHookPaths:  []string{"pre-update2"},
 		PostUpdateHookPaths: []string{"post-update2"},
-	}, &config.Template{
+	}
+	expected := &config.Template{
 		Repository:          "https://github.com/owner/repo.git",
 		Directory:           "foo",
 		InitOnlyPaths:       []string{"init1"},
@@ -43,9 +51,13 @@ var _ = DescribeTable("Merge", func(repoTemplate, localTemplate, expectedTemplat
 		PostInitHookPaths:   []string{"post-init1"},
 		PreUpdateHookPaths:  []string{"pre-update1"},
 		PostUpdateHookPaths: []string{"post-update1"},
-	}),
+	}
+	actual := config.Merge(repo, local)
+	s.Require().Equal(expected, actual)
+}
 
-	Entry("repo template has only new params", &config.Template{
+func (s *MergeTestSuite) TestMergeRepoTemplateWithOnlyNewParams() {
+	repo := &config.Template{
 		Directory: "foo",
 		Params: []*config.Param{
 			{
@@ -54,7 +66,8 @@ var _ = DescribeTable("Merge", func(repoTemplate, localTemplate, expectedTemplat
 				Default: "mine",
 			},
 		},
-	}, &config.Template{
+	}
+	local := &config.Template{
 		Repository: "https://github.com/owner/repo.git",
 		Directory:  "foo",
 		Params: []*config.Param{
@@ -69,7 +82,8 @@ var _ = DescribeTable("Merge", func(repoTemplate, localTemplate, expectedTemplat
 		PostInitHookPaths:   []string{"post-init2"},
 		PreUpdateHookPaths:  []string{"pre-update2"},
 		PostUpdateHookPaths: []string{"post-update2"},
-	}, &config.Template{
+	}
+	expected := &config.Template{
 		Repository: "https://github.com/owner/repo.git",
 		Directory:  "foo",
 		Params: []*config.Param{
@@ -79,9 +93,13 @@ var _ = DescribeTable("Merge", func(repoTemplate, localTemplate, expectedTemplat
 				Default: "mine",
 			},
 		},
-	}),
+	}
+	actual := config.Merge(repo, local)
+	s.Require().Equal(expected, actual)
+}
 
-	Entry("templates have matching params", &config.Template{
+func (s *MergeTestSuite) TestMergeTemplatesHaveMatchingParams() {
+	repo := &config.Template{
 		Directory: "foo",
 		Params: []*config.Param{
 			{
@@ -91,7 +109,8 @@ var _ = DescribeTable("Merge", func(repoTemplate, localTemplate, expectedTemplat
 				ValidationHook: "hook1",
 			},
 		},
-	}, &config.Template{
+	}
+	local := &config.Template{
 		Repository: "https://github.com/owner/repo.git",
 		Directory:  "foo",
 		Params: []*config.Param{
@@ -102,7 +121,8 @@ var _ = DescribeTable("Merge", func(repoTemplate, localTemplate, expectedTemplat
 				Value:   "value1",
 			},
 		},
-	}, &config.Template{
+	}
+	expected := &config.Template{
 		Repository: "https://github.com/owner/repo.git",
 		Directory:  "foo",
 		Params: []*config.Param{
@@ -114,8 +134,13 @@ var _ = DescribeTable("Merge", func(repoTemplate, localTemplate, expectedTemplat
 				Value:          "value1",
 			},
 		},
-	}),
-	Entry("templates have matching params but local does not have prompt", &config.Template{
+	}
+	actual := config.Merge(repo, local)
+	s.Require().Equal(expected, actual)
+}
+
+func (s *MergeTestSuite) TestMergeTemplatesHaveMatchingParamsLocalNoPrompt() {
+	repo := &config.Template{
 		Directory: "foo",
 		Params: []*config.Param{
 			{
@@ -125,7 +150,8 @@ var _ = DescribeTable("Merge", func(repoTemplate, localTemplate, expectedTemplat
 				ValidationHook: "hook1",
 			},
 		},
-	}, &config.Template{
+	}
+	local := &config.Template{
 		Repository: "https://github.com/owner/repo.git",
 		Directory:  "foo",
 		Params: []*config.Param{
@@ -134,7 +160,8 @@ var _ = DescribeTable("Merge", func(repoTemplate, localTemplate, expectedTemplat
 				Value: "value1",
 			},
 		},
-	}, &config.Template{
+	}
+	expected := &config.Template{
 		Repository: "https://github.com/owner/repo.git",
 		Directory:  "foo",
 		Params: []*config.Param{
@@ -145,5 +172,7 @@ var _ = DescribeTable("Merge", func(repoTemplate, localTemplate, expectedTemplat
 				ValidationHook: "hook1",
 			},
 		},
-	}),
-)
+	}
+	actual := config.Merge(repo, local)
+	s.Require().Equal(expected, actual)
+}

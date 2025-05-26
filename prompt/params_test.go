@@ -3,139 +3,124 @@ package prompt_test
 import (
 	"bytes"
 	"strings"
+	"testing"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/go-faker/faker/v4"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/rogueserenity/stenciler/config"
 	"github.com/rogueserenity/stenciler/prompt"
 )
 
-var _ = Describe("ForParamValuesWithInOut", func() {
-	var (
-		template *config.Template
-		repoDir  string
-		stdin    bytes.Buffer
-		stdout   *strings.Builder
+type PromptParamsTestSuite struct {
+	suite.Suite
 
-		err error
-	)
+	repoDir string
 
-	BeforeEach(func() {
-		stdout = &strings.Builder{}
-	})
+	stdin  *bytes.Buffer
+	stdout *strings.Builder
+}
 
-	JustBeforeEach(func() {
-		err = prompt.ForParamValuesWithInOut(template, repoDir, &stdin, stdout)
-	})
+func TestPromptParamsTestSuite(t *testing.T) {
+	suite.Run(t, new(PromptParamsTestSuite))
+}
 
-	Context("with a param with no prompt", func() {
-		BeforeEach(func() {
-			template = &config.Template{
-				Params: []*config.Param{
-					{
-						Name:  "foo",
-						Value: "bar",
-					},
-				},
-			}
-		})
+func (s *PromptParamsTestSuite) SetupTest() {
+	s.repoDir = faker.Word()
 
-		It("should not error", func() {
-			Expect(err).NotTo(HaveOccurred())
-		})
+	s.stdin = &bytes.Buffer{}
+	s.stdout = &strings.Builder{}
+}
 
-		It("should not prompt for a value", func() {
-			Expect(stdout.String()).To(BeEmpty())
-		})
-	})
+func (s *PromptParamsTestSuite) TestForParamValuesNoPrompt() {
+	template := &config.Template{
+		Params: []*config.Param{
+			{
+				Name:  "foo",
+				Value: "bar",
+			},
+		},
+	}
 
-	Context("with a param with a prompt", func() {
-		BeforeEach(func() {
-			template = &config.Template{
-				Params: []*config.Param{
-					{
-						Name:   "foo",
-						Prompt: "Enter a value for foo",
-					},
-				},
-			}
-		})
+	err := prompt.ForParamValuesWithInOut(template, s.repoDir, s.stdin, s.stdout)
+	s.NoError(err)
+	s.Empty(s.stdout.String())
+}
 
-		Context("with a value", func() {
-			BeforeEach(func() {
-				template.Params[0].Value = "bar"
-			})
+func (s *PromptParamsTestSuite) TestForParamValuesWithPromptAndValue() {
+	template := &config.Template{
+		Params: []*config.Param{
+			{
+				Name:   "foo",
+				Prompt: "Enter a value for foo",
+				Value:  "bar",
+			},
+		},
+	}
 
-			It("should not error", func() {
-				Expect(err).NotTo(HaveOccurred())
-			})
+	err := prompt.ForParamValuesWithInOut(template, s.repoDir, s.stdin, s.stdout)
+	s.NoError(err)
+	s.Empty(s.stdout.String())
+}
 
-			It("should not prompt for a value", func() {
-				Expect(stdout.String()).To(BeEmpty())
-			})
-		})
+func (s *PromptParamsTestSuite) TestForParamValuesWithPromptAndNoValue() {
+	template := &config.Template{
+		Params: []*config.Param{
+			{
+				Name:   "foo",
+				Prompt: "Enter a value for foo",
+			},
+		},
+	}
 
-		Context("without a value", func() {
-			Context("with a default value", func() {
-				BeforeEach(func() {
-					template.Params[0].Default = "baz"
-				})
+	s.stdin.WriteString("baz\n")
 
-				Context("without input", func() {
-					BeforeEach(func() {
-						stdin.WriteString("\n")
-					})
+	err := prompt.ForParamValuesWithInOut(template, s.repoDir, s.stdin, s.stdout)
+	s.NoError(err)
 
-					It("should not error", func() {
-						Expect(err).NotTo(HaveOccurred())
-					})
+	expectedOutput := "Enter a value for foo: "
+	s.Equal(expectedOutput, s.stdout.String())
+	s.Equal("baz", template.Params[0].Value)
+}
 
-					It("should prompt for a value", func() {
-						Expect(stdout.String()).To(Equal("Enter a value for foo [baz]: "))
-					})
+func (s *PromptParamsTestSuite) TestForParamValuesWithPromptAndDefaultValue() {
+	template := &config.Template{
+		Params: []*config.Param{
+			{
+				Name:    "foo",
+				Prompt:  "Enter a value for foo",
+				Default: "default_value",
+			},
+		},
+	}
 
-					It("should set the value to the default value", func() {
-						Expect(template.Params[0].Value).To(Equal("baz"))
-					})
-				})
+	s.stdin.WriteString("\n")
 
-				Context("with input", func() {
-					BeforeEach(func() {
-						stdin.WriteString("blah\n")
-					})
+	err := prompt.ForParamValuesWithInOut(template, s.repoDir, s.stdin, s.stdout)
+	s.NoError(err)
 
-					It("should not error", func() {
-						Expect(err).NotTo(HaveOccurred())
-					})
+	expectedOutput := "Enter a value for foo [default_value]: "
+	s.Equal(expectedOutput, s.stdout.String())
+	s.Equal("default_value", template.Params[0].Value)
+}
 
-					It("should prompt for a value", func() {
-						Expect(stdout.String()).To(Equal("Enter a value for foo [baz]: "))
-					})
+func (s *PromptParamsTestSuite) TestForParamValuesWithPromptAndDefaultValueAndInput() {
+	template := &config.Template{
+		Params: []*config.Param{
+			{
+				Name:    "foo",
+				Prompt:  "Enter a value for foo",
+				Default: "default_value",
+			},
+		},
+	}
 
-					It("should set the value to the input value", func() {
-						Expect(template.Params[0].Value).To(Equal("blah"))
-					})
-				})
-			})
+	s.stdin.WriteString("input_value\n")
 
-			Context("without a default value", func() {
-				BeforeEach(func() {
-					stdin.WriteString("blah\n")
-				})
+	err := prompt.ForParamValuesWithInOut(template, s.repoDir, s.stdin, s.stdout)
+	s.NoError(err)
 
-				It("should not error", func() {
-					Expect(err).NotTo(HaveOccurred())
-				})
-
-				It("should prompt for a value", func() {
-					Expect(stdout.String()).To(Equal("Enter a value for foo: "))
-				})
-
-				It("should set the value to the input value", func() {
-					Expect(template.Params[0].Value).To(Equal("blah"))
-				})
-			})
-		})
-	})
-})
+	expectedOutput := "Enter a value for foo [default_value]: "
+	s.Equal(expectedOutput, s.stdout.String())
+	s.Equal("input_value", template.Params[0].Value)
+}

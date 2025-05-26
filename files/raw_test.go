@@ -2,136 +2,115 @@ package files_test
 
 import (
 	"os"
+	"path"
+	"testing"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/rogueserenity/stenciler/config"
 	"github.com/rogueserenity/stenciler/files"
 )
 
-// since we're doing tests on the filesystem, keep the executions to a minimum for performance
+type CopyRawTestSuite struct {
+	suite.Suite
 
-var _ = Describe("CopyRaw", func() {
+	srcDir  string
+	destDir string
+}
 
-	var (
-		template *config.Template
-		srcDir   string
-		destDir  string
-		err      error
-	)
+func TestCopyRawTestSuite(t *testing.T) {
+	suite.Run(t, new(CopyRawTestSuite))
+}
 
-	BeforeEach(func() {
-		srcDir, err = os.MkdirTemp("", "copy-raw-test-src")
-		Expect(err).ToNot(HaveOccurred())
-		destDir, err = os.MkdirTemp("", "copy-raw-test-dst")
-		Expect(err).ToNot(HaveOccurred())
+func (s *CopyRawTestSuite) SetupSuite() {
+	var err error
+	s.srcDir, err = os.MkdirTemp("", "copy-raw-test-src")
+	s.Require().NoError(err)
 
-		err = os.Chdir(destDir)
-		Expect(err).ToNot(HaveOccurred())
-		err = os.MkdirAll(srcDir+"/root/foo/bar/baz", 0755)
-		Expect(err).ToNot(HaveOccurred())
-		err = os.WriteFile(srcDir+"/root/foo.md", []byte("foo"), 0644)
-		Expect(err).ToNot(HaveOccurred())
-		err = os.WriteFile(srcDir+"/root/foo/foo.md", []byte("foo"), 0644)
-		Expect(err).ToNot(HaveOccurred())
-		err = os.WriteFile(srcDir+"/root/bar.txt", []byte("bar"), 0644)
-		Expect(err).ToNot(HaveOccurred())
-		err = os.WriteFile(srcDir+"/root/foo/bar.txt", []byte("bar"), 0644)
-		Expect(err).ToNot(HaveOccurred())
-		err = os.WriteFile(srcDir+"/root/foo/bar/bar.txt", []byte("bar"), 0644)
-		Expect(err).ToNot(HaveOccurred())
-		err = os.WriteFile(srcDir+"/root/foo/bar/baz/bar.txt", []byte("bar"), 0644)
-		Expect(err).ToNot(HaveOccurred())
-	})
+	err = os.MkdirAll(path.Join(s.srcDir, "/root/foo/bar/baz"), 0755)
+	s.Require().NoError(err)
+	err = os.WriteFile(path.Join(s.srcDir, "/root/foo.md"), []byte("foo"), 0644)
+	s.Require().NoError(err)
+	err = os.WriteFile(path.Join(s.srcDir, "/root/foo/foo.md"), []byte("foo"), 0644)
+	s.Require().NoError(err)
+	err = os.WriteFile(path.Join(s.srcDir, "/root/bar.txt"), []byte("bar"), 0644)
+	s.Require().NoError(err)
+	err = os.WriteFile(path.Join(s.srcDir, "/root/foo/bar.txt"), []byte("bar"), 0644)
+	s.Require().NoError(err)
+	err = os.WriteFile(path.Join(s.srcDir, "/root/foo/bar/bar.txt"), []byte("bar"), 0644)
+	s.Require().NoError(err)
+	err = os.WriteFile(path.Join(s.srcDir, "/root/foo/bar/baz/bar.txt"), []byte("bar"), 0644)
+	s.Require().NoError(err)
+}
 
-	AfterEach(func() {
-		os.RemoveAll(srcDir)
-		os.RemoveAll(destDir)
-	})
+func (s *CopyRawTestSuite) TearDownSuite() {
+	os.RemoveAll(s.srcDir)
+}
 
-	JustBeforeEach(func() {
-		err = files.CopyRaw(srcDir, template)
-	})
+func (s *CopyRawTestSuite) SetupTest() {
+	var err error
+	s.destDir, err = os.MkdirTemp("", "copy-raw-test-dst")
+	s.Require().NoError(err)
 
-	Context("copies nothing with empty RawCopyPaths", func() {
-		BeforeEach(func() {
-			template = &config.Template{
-				Directory: "root",
-			}
-		})
+	err = os.Chdir(s.destDir)
+	s.Require().NoError(err)
+}
 
-		It("should not error or copy any files", func() {
-			Expect(err).ToNot(HaveOccurred())
-			_, lerr := os.Stat(destDir + "/foo.md")
-			Expect(lerr).To(HaveOccurred())
-			_, lerr = os.Stat(destDir + "/foo/foo.md")
-			Expect(lerr).To(HaveOccurred())
-			_, lerr = os.Stat(destDir + "/bar.txt")
-			Expect(lerr).To(HaveOccurred())
-			_, lerr = os.Stat(destDir + "/foo/bar.txt")
-			Expect(lerr).To(HaveOccurred())
-			_, lerr = os.Stat(destDir + "/foo/bar/bar.txt")
-			Expect(lerr).To(HaveOccurred())
-			_, lerr = os.Stat(destDir + "/foo/bar/baz/bar.txt")
-			Expect(lerr).To(HaveOccurred())
-		})
-	})
+func (s *CopyRawTestSuite) TearDownTest() {
+	os.RemoveAll(s.destDir)
+}
 
-	Context("copies explicit file names", func() {
-		BeforeEach(func() {
-			template = &config.Template{
-				Directory: "root",
-				RawCopyPaths: []string{
-					"foo.md",
-					"bar.txt",
-					"foo/bar.txt",
-				},
-			}
-		})
+func (s *CopyRawTestSuite) TestEmptyRawCopyPaths() {
+	template := &config.Template{
+		Directory: "root",
+	}
 
-		It("should not error and should the copy files", func() {
-			Expect(err).ToNot(HaveOccurred())
-			_, lerr := os.Stat(destDir + "/foo.md")
-			Expect(lerr).ToNot(HaveOccurred())
-			_, lerr = os.Stat(destDir + "/foo/foo.md")
-			Expect(lerr).To(HaveOccurred())
-			_, lerr = os.Stat(destDir + "/bar.txt")
-			Expect(lerr).ToNot(HaveOccurred())
-			_, lerr = os.Stat(destDir + "/foo/bar.txt")
-			Expect(lerr).ToNot(HaveOccurred())
-			_, lerr = os.Stat(destDir + "/foo/bar/bar.txt")
-			Expect(lerr).To(HaveOccurred())
-			_, lerr = os.Stat(destDir + "/foo/bar/baz/bar.txt")
-			Expect(lerr).To(HaveOccurred())
-		})
-	})
+	err := files.CopyRaw(s.srcDir, template)
+	s.Require().NoError(err)
 
-	Context("copies globbed file names", func() {
-		BeforeEach(func() {
-			template = &config.Template{
-				Directory: "root",
-				RawCopyPaths: []string{
-					"foo.md",
-					"**/bar.txt",
-				},
-			}
-		})
+	s.Require().NoFileExists(path.Join(s.destDir, "foo.md"))
+	s.Require().NoFileExists(path.Join(s.destDir, "foo/foo.md"))
+	s.Require().NoFileExists(path.Join(s.destDir, "bar.txt"))
+	s.Require().NoFileExists(path.Join(s.destDir, "foo/bar.txt"))
+	s.Require().NoFileExists(path.Join(s.destDir, "foo/bar/bar.txt"))
+	s.Require().NoFileExists(path.Join(s.destDir, "foo/bar/baz/bar.txt"))
+}
 
-		It("should not error and should the copy files", func() {
-			Expect(err).ToNot(HaveOccurred())
-			_, lerr := os.Stat(destDir + "/foo.md")
-			Expect(lerr).ToNot(HaveOccurred())
-			_, lerr = os.Stat(destDir + "/foo/foo.md")
-			Expect(lerr).To(HaveOccurred())
-			_, lerr = os.Stat(destDir + "/bar.txt")
-			Expect(lerr).ToNot(HaveOccurred())
-			_, lerr = os.Stat(destDir + "/foo/bar.txt")
-			Expect(lerr).ToNot(HaveOccurred())
-			_, lerr = os.Stat(destDir + "/foo/bar/bar.txt")
-			Expect(lerr).ToNot(HaveOccurred())
-			_, lerr = os.Stat(destDir + "/foo/bar/baz/bar.txt")
-			Expect(lerr).ToNot(HaveOccurred())
-		})
-	})
-})
+func (s *CopyRawTestSuite) TestCopyExplicitFileNames() {
+	template := &config.Template{
+		Directory: "root",
+		RawCopyPaths: []string{
+			"foo.md",
+			"bar.txt",
+			"foo/bar.txt",
+		},
+	}
+
+	err := files.CopyRaw(s.srcDir, template)
+	s.Require().NoError(err)
+	s.Require().FileExists(path.Join(s.destDir, "foo.md"))
+	s.Require().NoFileExists(path.Join(s.destDir, "foo/foo.md"))
+	s.Require().FileExists(path.Join(s.destDir, "bar.txt"))
+	s.Require().FileExists(path.Join(s.destDir, "foo/bar.txt"))
+	s.Require().NoFileExists(path.Join(s.destDir, "foo/bar/bar.txt"))
+	s.Require().NoFileExists(path.Join(s.destDir, "foo/bar/baz/bar.txt"))
+}
+
+func (s *CopyRawTestSuite) TestCopyGlobbedFileNames() {
+	template := &config.Template{
+		Directory: "root",
+		RawCopyPaths: []string{
+			"foo.md",
+			"**/bar.txt",
+		},
+	}
+
+	err := files.CopyRaw(s.srcDir, template)
+	s.Require().NoError(err)
+	s.Require().FileExists(path.Join(s.destDir, "foo.md"))
+	s.Require().NoFileExists(path.Join(s.destDir, "foo/foo.md"))
+	s.Require().FileExists(path.Join(s.destDir, "bar.txt"))
+	s.Require().FileExists(path.Join(s.destDir, "foo/bar.txt"))
+	s.Require().FileExists(path.Join(s.destDir, "foo/bar/bar.txt"))
+	s.Require().FileExists(path.Join(s.destDir, "foo/bar/baz/bar.txt"))
+}
