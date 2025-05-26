@@ -2,7 +2,6 @@ version: "2"
 linters:
   enable:
     - cyclop
-    - ginkgolinter
     - godot
     - godox
     - revive
@@ -21,11 +20,6 @@ linters:
           disabled: true
         - name: deep-exit
           disabled: true
-        - name: dot-imports
-          arguments:
-            - allowedPackages:
-                - github.com/onsi/ginkgo/v2
-                - github.com/onsi/gomega
         - name: empty-lines
           disabled: true
         - name: exported
@@ -59,6 +53,8 @@ linters:
         text: (Expect directory permissions to be 0750 or less|Expect file permissions to be 0600 or less)
       - path: (.+)\.go$
         text: Potential file inclusion via variable
+      - path: (.+)_test\.go$
+        text: (Unhandled error in call to function)
     paths:
       - third_party$
       - builtin$

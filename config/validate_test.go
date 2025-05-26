@@ -3,107 +3,83 @@ package config_test
 import (
 	"os"
 	"path/filepath"
+	"testing"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/rogueserenity/stenciler/config"
 )
 
-var _ = Describe("Validate", func() {
+type ValidateTestSuite struct {
+	suite.Suite
 
-	DescribeTable("Validate with non-existent hooks", func(template config.Template) {
+	templates []config.Template
+}
+
+func TestValidateTestSuite(t *testing.T) {
+	suite.Run(t, new(ValidateTestSuite))
+}
+
+func (s *ValidateTestSuite) SetupTest() {
+	s.templates = []config.Template{
+		{
+			Params: []*config.Param{
+				{
+					ValidationHook: "invalid-hook",
+				},
+			},
+		},
+		{
+			PreInitHookPaths: []string{"invalid-hook"},
+		},
+		{
+			PostInitHookPaths: []string{"invalid-hook"},
+		},
+		{
+			PreUpdateHookPaths: []string{"invalid-hook"},
+		},
+		{
+			PostUpdateHookPaths: []string{"invalid-hook"},
+		},
+	}
+}
+
+func (s *ValidateTestSuite) TestValidateWithNonExistentHooks() {
+	for _, template := range s.templates {
 		repoPath := "test-repo"
 		err := template.Validate(repoPath)
-		Expect(err).To(MatchError("hook invalid-hook does not exist"))
-	},
-		Entry("ValidationHook", config.Template{
-			Params: []*config.Param{
-				{
-					ValidationHook: "invalid-hook",
-				},
-			},
-		}),
-		Entry("PreInitHookPaths", config.Template{
-			PreInitHookPaths: []string{"invalid-hook"},
-		}),
-		Entry("PostInitHookPaths", config.Template{
-			PostInitHookPaths: []string{"invalid-hook"},
-		}),
-		Entry("PreUpdateHookPaths", config.Template{
-			PreUpdateHookPaths: []string{"invalid-hook"},
-		}),
-		Entry("PostUpdateHookPaths", config.Template{
-			PostUpdateHookPaths: []string{"invalid-hook"},
-		}),
-	)
+		s.Require().ErrorContains(err, "hook invalid-hook does not exist")
+	}
+}
 
-	DescribeTable("Validate with non-executable hooks", func(template config.Template) {
-		repoPath, err := os.MkdirTemp("", "test-repo")
-		Expect(err).NotTo(HaveOccurred())
-		defer os.RemoveAll(repoPath)
-		file, err := os.Create(filepath.Join(repoPath, "invalid-hook"))
-		Expect(err).NotTo(HaveOccurred())
-		err = file.Close()
-		Expect(err).NotTo(HaveOccurred())
+func (s *ValidateTestSuite) TestValidateWithNonExecutableHooks() {
+	repoPath, err := os.MkdirTemp("", "test-repo")
+	s.Require().NoError(err)
+	defer os.RemoveAll(repoPath)
+	file, err := os.Create(filepath.Join(repoPath, "invalid-hook"))
+	s.Require().NoError(err)
+	err = file.Close()
+	s.Require().NoError(err)
 
+	for _, template := range s.templates {
 		err = template.Validate(repoPath)
-		Expect(err).To(MatchError("hook invalid-hook is not executable"))
-	},
-		Entry("ValidationHook", config.Template{
-			Params: []*config.Param{
-				{
-					ValidationHook: "invalid-hook",
-				},
-			},
-		}),
-		Entry("PreInitHookPaths", config.Template{
-			PreInitHookPaths: []string{"invalid-hook"},
-		}),
-		Entry("PostInitHookPaths", config.Template{
-			PostInitHookPaths: []string{"invalid-hook"},
-		}),
-		Entry("PreUpdateHookPaths", config.Template{
-			PreUpdateHookPaths: []string{"invalid-hook"},
-		}),
-		Entry("PostUpdateHookPaths", config.Template{
-			PostUpdateHookPaths: []string{"invalid-hook"},
-		}),
-	)
+		s.Require().ErrorContains(err, "hook invalid-hook is not executable")
+	}
+}
 
-	DescribeTable("Validate with valid hooks", func(template config.Template) {
-		repoPath, err := os.MkdirTemp("", "test-repo")
-		Expect(err).NotTo(HaveOccurred())
-		defer os.RemoveAll(repoPath)
-		file, err := os.Create(filepath.Join(repoPath, "invalid-hook"))
-		Expect(err).NotTo(HaveOccurred())
-		err = file.Chmod(0755)
-		Expect(err).NotTo(HaveOccurred())
-		err = file.Close()
-		Expect(err).NotTo(HaveOccurred())
+func (s *ValidateTestSuite) TestValidateWithValidHooks() {
+	repoPath, err := os.MkdirTemp("", "test-repo")
+	s.Require().NoError(err)
+	defer os.RemoveAll(repoPath)
+	file, err := os.Create(filepath.Join(repoPath, "invalid-hook"))
+	s.Require().NoError(err)
+	err = file.Chmod(0755)
+	s.Require().NoError(err)
+	err = file.Close()
+	s.Require().NoError(err)
 
+	for _, template := range s.templates {
 		err = template.Validate(repoPath)
-		Expect(err).ToNot(HaveOccurred())
-	},
-		Entry("ValidationHook", config.Template{
-			Params: []*config.Param{
-				{
-					ValidationHook: "invalid-hook",
-				},
-			},
-		}),
-		Entry("PreInitHookPaths", config.Template{
-			PreInitHookPaths: []string{"invalid-hook"},
-		}),
-		Entry("PostInitHookPaths", config.Template{
-			PostInitHookPaths: []string{"invalid-hook"},
-		}),
-		Entry("PreUpdateHookPaths", config.Template{
-			PreUpdateHookPaths: []string{"invalid-hook"},
-		}),
-		Entry("PostUpdateHookPaths", config.Template{
-			PostUpdateHookPaths: []string{"invalid-hook"},
-		}),
-	)
-
-})
+		s.Require().NoError(err)
+	}
+}

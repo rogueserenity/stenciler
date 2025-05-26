@@ -28,8 +28,7 @@ gol
 
 ### Unit Tests
 
-Unit testing is developed using the [Ginkgo](https://onsi.github.io/ginkgo/) Framework along with
-[Gomega](https://onsi.github.io/gomega/) matchers.
+Unit testing is developed using [Testify](https://github.com/stretchr/testify) test suites and assertions.
 
 #### Generating Mocks
 

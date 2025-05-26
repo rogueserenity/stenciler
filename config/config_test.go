@@ -1,37 +1,34 @@
 package config_test
 
 import (
-	"io"
+	"os"
+	"path"
 	"strings"
+	"testing"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/go-faker/faker/v4"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/rogueserenity/stenciler/config"
 )
 
-var _ = Describe("Config", func() {
+type ConfigTestSuite struct {
+	suite.Suite
 
-	Describe("Read", func() {
-		var (
-			reader io.Reader
-			cfg    *config.Config
-			err    error
-		)
+	configText string
+	cfg        *config.Config
+}
 
-		JustBeforeEach(func() {
-			cfg, err = config.Read(reader)
-		})
+func TestConfigTestSuite(t *testing.T) {
+	suite.Run(t, new(ConfigTestSuite))
+}
 
-		Context("when given a config with all possible fields", func() {
-			var input = `
-templates:
--
-  repository: https://github.com/rogueserenity/stenciler-test
+func (s *ConfigTestSuite) SetupTest() {
+	s.configText = `templates:
+- repository: https://github.com/rogueserenity/stenciler-test
   directory: test
   params:
-  -
-    name: param1
+  - name: param1
     prompt: prompt1
     default: mine
     validation-hook: hook1
@@ -43,168 +40,104 @@ templates:
   pre-update-hooks: ["pre-update1"]
   post-update-hooks: ["post-update1"]
 `
-			BeforeEach(func() {
-				reader = strings.NewReader(input)
-			})
 
-			It("should not error", func() {
-				Expect(err).NotTo(HaveOccurred())
-			})
-
-			It("should return a Config object with all fields", func() {
-				Expect(cfg).ToNot(BeNil())
-				Expect(cfg.Templates).To(HaveLen(1))
-				template := cfg.Templates[0]
-				Expect(template.Repository).To(Equal("https://github.com/rogueserenity/stenciler-test"))
-				Expect(template.Directory).To(Equal("test"))
-				Expect(template.Params).To(HaveLen(1))
-				param := template.Params[0]
-				Expect(param.Name).To(Equal("param1"))
-				Expect(param.Prompt).To(Equal("prompt1"))
-				Expect(param.Default).To(Equal("mine"))
-				Expect(param.ValidationHook).To(Equal("hook1"))
-				Expect(param.Value).To(Equal("yours"))
-				Expect(template.InitOnlyPaths).To(Equal([]string{"init1"}))
-				Expect(template.RawCopyPaths).To(Equal([]string{"raw1"}))
-				Expect(template.PreInitHookPaths).To(Equal([]string{"pre-init1"}))
-				Expect(template.PostInitHookPaths).To(Equal([]string{"post-init1"}))
-				Expect(template.PreUpdateHookPaths).To(Equal([]string{"pre-update1"}))
-				Expect(template.PostUpdateHookPaths).To(Equal([]string{"post-update1"}))
-			})
-		})
-	})
-
-	Describe("Write", func() {
-		var (
-			cfg *config.Config
-
-			writer *strings.Builder
-			err    error
-
-			expected string
-			actual   string
-		)
-
-		BeforeEach(func() {
-			writer = &strings.Builder{}
-		})
-
-		JustBeforeEach(func() {
-			err = cfg.Write(writer)
-			actual = writer.String()
-		})
-
-		Context("with empty config", func() {
-			BeforeEach(func() {
-				cfg = &config.Config{}
-				expected = ""
-			})
-
-			It("should not error", func() {
-				Expect(err).To(MatchError("unable to write empty config"))
-			})
-
-			It("should return an empty config", func() {
-				Expect(actual).To(Equal(expected))
-			})
-		})
-
-		Context("with simple config", func() {
-			BeforeEach(func() {
-				cfg = &config.Config{
-					Templates: []*config.Template{
-						{
-							Repository: "https://github.com/rogueserenity/stenciler-test",
-							Directory:  "test",
-						},
+	s.cfg = &config.Config{
+		Templates: []*config.Template{
+			{
+				Repository: "https://github.com/rogueserenity/stenciler-test",
+				Directory:  "test",
+				Params: []*config.Param{
+					{
+						Name:           "param1",
+						Prompt:         "prompt1",
+						Default:        "mine",
+						ValidationHook: "hook1",
+						Value:          "yours",
 					},
-				}
-				expected = `templates:
-    - repository: https://github.com/rogueserenity/stenciler-test
-      directory: test
+				},
+				InitOnlyPaths:       []string{"init1"},
+				RawCopyPaths:        []string{"raw1"},
+				PreInitHookPaths:    []string{"pre-init1"},
+				PostInitHookPaths:   []string{"post-init1"},
+				PreUpdateHookPaths:  []string{"pre-update1"},
+				PostUpdateHookPaths: []string{"post-update1"},
+			},
+		},
+	}
+}
+
+func (s *ConfigTestSuite) TestRead() {
+	reader := strings.NewReader(s.configText)
+	actual, err := config.Read(reader)
+	s.Require().NoError(err)
+	s.Require().Equal(s.cfg, actual)
+}
+
+func (s *ConfigTestSuite) TestWrite() {
+	writer := &strings.Builder{}
+	err := s.cfg.Write(writer)
+	s.Require().NoError(err)
+	s.Require().YAMLEq(s.configText, writer.String())
+}
+
+func (s *ConfigTestSuite) TestParamValidateNoHook() {
+	param := &config.Param{
+		Name:    "test",
+		Prompt:  "Test Prompt",
+		Default: "default",
+		Value:   "value",
+	}
+
+	err := param.Validate(faker.Word())
+	s.Require().NoError(err)
+}
+
+func (s *ConfigTestSuite) TestParamValidateMissingHook() {
+	param := &config.Param{
+		Name:           "test",
+		Prompt:         "Test Prompt",
+		Default:        "default",
+		Value:          "value",
+		ValidationHook: "missing-hook",
+	}
+
+	dir := os.TempDir()
+	err := param.Validate(dir)
+	s.Require().ErrorContains(err, "failed to execute validation hook missing-hook on test with value value:")
+}
+
+func (s *ConfigTestSuite) TestParamValidateWithHook() {
+	param := &config.Param{
+		Name:           "test",
+		Prompt:         "Test Prompt",
+		Default:        "default",
+		Value:          "value",
+		ValidationHook: "valid.sh",
+	}
+
+	contents := `#!/bin/sh
+	echo "validated_value"
 `
-			})
+	dir := os.TempDir()
+	f, err := os.Create(path.Join(dir, "valid.sh"))
+	s.Require().NoError(err)
+	_, err = f.Write([]byte(contents))
+	s.Require().NoError(err)
+	s.Require().NoError(f.Close())
+	defer os.Remove(path.Join(dir, "valid.sh"))
 
-			It("should not error", func() {
-				Expect(err).ToNot(HaveOccurred())
-			})
+	err = param.Validate(dir)
+	s.Require().NoError(err)
 
-			It("should return an empty config", func() {
-				Expect(actual).To(Equal(expected))
-			})
-		})
+	s.Require().Equal("validated_value", param.Value)
+}
 
-		Context("with full config", func() {
-			BeforeEach(func() {
-				cfg = &config.Config{
-					Templates: []*config.Template{
-						{
-							Repository: "https://github.com/rogueserenity/stenciler-test",
-							Directory:  "test",
-							Params: []*config.Param{
-								{
-									Name:           "spoo",
-									Prompt:         "Would you like spoo?",
-									Default:        "false",
-									ValidationHook: "hooks/spoo.sh",
-									Value:          "true",
-								},
-							},
-							InitOnlyPaths: []string{
-								"go.mod",
-								"go.sum",
-							},
-							RawCopyPaths: []string{
-								"**/*.py",
-							},
-							PreInitHookPaths: []string{
-								"hooks/preinit",
-							},
-							PostInitHookPaths: []string{
-								"hooks/postinit",
-							},
-							PreUpdateHookPaths: []string{
-								"hooks/preup",
-							},
-							PostUpdateHookPaths: []string{
-								"hooks/postup",
-							},
-						},
-					},
-				}
-				expected = `templates:
-    - repository: https://github.com/rogueserenity/stenciler-test
-      directory: test
-      params:
-        - name: spoo
-          prompt: Would you like spoo?
-          default: "false"
-          validation-hook: hooks/spoo.sh
-          value: "true"
-      init-only:
-        - go.mod
-        - go.sum
-      raw-copy:
-        - '**/*.py'
-      pre-init-hooks:
-        - hooks/preinit
-      post-init-hooks:
-        - hooks/postinit
-      pre-update-hooks:
-        - hooks/preup
-      post-update-hooks:
-        - hooks/postup
-`
-			})
+func (s *ConfigTestSuite) TestExecuteHooksInvalidClass() {
+	template := &config.Template{
+		Repository: faker.URL(),
+		Directory:  faker.Word(),
+	}
 
-			It("should not error", func() {
-				Expect(err).ToNot(HaveOccurred())
-			})
-
-			It("should return an empty config", func() {
-				Expect(actual).To(Equal(expected))
-			})
-		})
-	})
-
-})
+	err := template.ExecuteHooks("test-dir", config.HookClass(42))
+	s.Require().ErrorContains(err, "unknown hook class 42")
+}

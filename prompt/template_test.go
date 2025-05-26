@@ -3,172 +3,110 @@ package prompt_test
 import (
 	"bytes"
 	"strings"
+	"testing"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/suite"
 
 	"github.com/rogueserenity/stenciler/config"
 	"github.com/rogueserenity/stenciler/prompt"
 )
 
-var _ = Describe("SelectTemplateWithInOut", func() {
-	var (
-		templateDir string
-		cfg         *config.Config
-		stdin       bytes.Buffer
-		stdout      *strings.Builder
+type PromptForTemplateTestSuite struct {
+	suite.Suite
 
-		template *config.Template
-		err      error
-	)
+	stdin  *bytes.Buffer
+	stdout *strings.Builder
+}
 
-	BeforeEach(func() {
-		stdout = &strings.Builder{}
-	})
+func TestPromptForTemplateTestSuite(t *testing.T) {
+	suite.Run(t, new(PromptForTemplateTestSuite))
+}
 
-	JustBeforeEach(func() {
-		template, err = prompt.SelectTemplateWithInOut(templateDir, cfg, &stdin, stdout)
-	})
+func (s *PromptForTemplateTestSuite) SetupTest() {
+	s.stdin = &bytes.Buffer{}
+	s.stdout = &strings.Builder{}
+}
 
-	Context("when a template directory is specified", func() {
-		BeforeEach(func() {
-			templateDir = "foo"
-		})
+func (s *PromptForTemplateTestSuite) TestSelectTemplateWithValidDir() {
+	templateDir := "foo"
+	cfg := &config.Config{
+		Templates: []*config.Template{
+			{Directory: "foo"},
+			{Directory: "bar"},
+		},
+	}
 
-		Context("when the template directory is found in the config", func() {
-			BeforeEach(func() {
-				cfg = &config.Config{
-					Templates: []*config.Template{
-						{
-							Directory: "foo",
-						},
-						{
-							Directory: "bar",
-						},
-					},
-				}
-			})
+	template, err := prompt.SelectTemplateWithInOut(templateDir, cfg, s.stdin, s.stdout)
+	s.NoError(err)
+	s.NotNil(template)
+	s.Equal("foo", template.Directory)
+}
 
-			It("should not error", func() {
-				Expect(err).NotTo(HaveOccurred())
-			})
+func (s *PromptForTemplateTestSuite) TestSelectTemplateWithInvalidDir() {
+	templateDir := "baz"
+	cfg := &config.Config{
+		Templates: []*config.Template{
+			{Directory: "foo"},
+			{Directory: "bar"},
+		},
+	}
 
-			It("should return the template", func() {
-				Expect(template).NotTo(BeNil())
-				Expect(template.Directory).To(Equal("foo"))
-			})
-		})
+	template, err := prompt.SelectTemplateWithInOut(templateDir, cfg, s.stdin, s.stdout)
+	s.ErrorContains(err, "template directory not found in config")
+	s.Nil(template)
+}
 
-		Context("when the template directory is not found in the config", func() {
-			BeforeEach(func() {
-				cfg = &config.Config{
-					Templates: []*config.Template{
-						{
-							Directory: "bar",
-						},
-					},
-				}
-			})
+func (s *PromptForTemplateTestSuite) TestSelectTemplateWithSingleTemplate() {
+	templateDir := ""
+	cfg := &config.Config{
+		Templates: []*config.Template{
+			{Directory: "foo"},
+		},
+	}
 
-			It("should error", func() {
-				Expect(err).To(HaveOccurred())
-			})
+	template, err := prompt.SelectTemplateWithInOut(templateDir, cfg, s.stdin, s.stdout)
+	s.NoError(err)
+	s.NotNil(template)
+	s.Equal("foo", template.Directory)
+}
 
-			It("should return nil", func() {
-				Expect(template).To(BeNil())
-			})
-		})
-	})
+func (s *PromptForTemplateTestSuite) TestSelectTemplateWithMultipleTemplatesInvalidSelection() {
+	templateDir := ""
+	cfg := &config.Config{
+		Templates: []*config.Template{
+			{Directory: "foo"},
+			{Directory: "bar"},
+		},
+	}
 
-	Context("when no template directory is specified", func() {
-		BeforeEach(func() {
-			templateDir = ""
-		})
+	s.stdin.WriteString("baz\nfoo\n") // Invalid first selection, valid second selection
 
-		Context("when there is only one template in the config", func() {
-			BeforeEach(func() {
-				cfg = &config.Config{
-					Templates: []*config.Template{
-						{
-							Directory: "foo",
-						},
-					},
-				}
-			})
+	template, err := prompt.SelectTemplateWithInOut(templateDir, cfg, s.stdin, s.stdout)
+	s.NoError(err)
+	s.NotNil(template)
+	s.Equal("foo", template.Directory)
 
-			It("should not error", func() {
-				Expect(err).NotTo(HaveOccurred())
-			})
+	expectedOutput := "Available templates:\n>  bar\n>  foo\nplease specify the template directory to use: " +
+		"Available templates:\n>  bar\n>  foo\nplease specify the template directory to use: "
+	s.Equal(expectedOutput, s.stdout.String())
+}
 
-			It("should return the template", func() {
-				Expect(template).NotTo(BeNil())
-				Expect(template.Directory).To(Equal("foo"))
-			})
-		})
+func (s *PromptForTemplateTestSuite) TestSelectTemplateWithMultipleTemplatesValidSelection() {
+	templateDir := ""
+	cfg := &config.Config{
+		Templates: []*config.Template{
+			{Directory: "foo"},
+			{Directory: "bar"},
+		},
+	}
 
-		Context("when there are multiple templates in the config", func() {
-			BeforeEach(func() {
-				cfg = &config.Config{
-					Templates: []*config.Template{
-						{
-							Directory: "foo",
-						},
-						{
-							Directory: "bar",
-						},
-					},
-				}
-			})
+	s.stdin.WriteString("foo\n") // Valid selection
 
-			Context("when the user selects a valid template directory", func() {
-				BeforeEach(func() {
-					stdin.Reset()
-					stdin.WriteString("foo\n")
-				})
+	template, err := prompt.SelectTemplateWithInOut(templateDir, cfg, s.stdin, s.stdout)
+	s.NoError(err)
+	s.NotNil(template)
+	s.Equal("foo", template.Directory)
 
-				It("should have the correct output", func() {
-					Expect(stdout.String()).To(Equal("Available templates:\n" +
-						">  bar\n" +
-						">  foo\n" +
-						"please specify the template directory to use: "))
-				})
-
-				It("should not error", func() {
-					Expect(err).NotTo(HaveOccurred())
-				})
-
-				It("should return the template", func() {
-					Expect(template).NotTo(BeNil())
-					Expect(template.Directory).To(Equal("foo"))
-				})
-			})
-
-			Context("when the user selects an invalid template directory", func() {
-				BeforeEach(func() {
-					stdin.Reset()
-					stdin.WriteString("baz\nfoo\n")
-				})
-
-				It("should have the correct output", func() {
-					Expect(stdout.String()).To(Equal("Available templates:\n" +
-						">  bar\n" +
-						">  foo\n" +
-						"please specify the template directory to use: " +
-						"Available templates:\n" +
-						">  bar\n" +
-						">  foo\n" +
-						"please specify the template directory to use: "))
-				})
-
-				It("should not error", func() {
-					Expect(err).NotTo(HaveOccurred())
-				})
-
-				It("should return the template", func() {
-					Expect(template).NotTo(BeNil())
-					Expect(template.Directory).To(Equal("foo"))
-				})
-			})
-		})
-	})
-})
+	expectedOutput := "Available templates:\n>  bar\n>  foo\nplease specify the template directory to use: "
+	s.Equal(expectedOutput, s.stdout.String())
+}
