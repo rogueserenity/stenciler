@@ -8,7 +8,7 @@
 		"ghcr.io/devcontainers-contrib/features/poetry:2": {},
 		"ghcr.io/devcontainers/features/go:1": {
 			"version": "1.23",
-			"golangciLintVersion": "1.63.4"
+			"golangciLintVersion": "2.1.6"
 		}
 	},
 	"customizations": {
