@@ -14,6 +14,7 @@ Feature: Cloning a repository
     When I run stenciler init with the repository URL in an empty directory
     Then I see the current directory initialized with the repo template data
 
+  @private
   Scenario: Cloning a private repository from GitHub using HTTPS
     Given I have a "private" repository on GitHub
     And I have the "HTTPS" URL of the repository

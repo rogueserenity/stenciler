@@ -1,7 +1,7 @@
 import filecmp
 import os
 
-from behave.model import then
+from behave import then
 from behave.runner import Context
 
 

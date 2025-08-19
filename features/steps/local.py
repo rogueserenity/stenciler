@@ -3,7 +3,7 @@ import os
 import shutil
 
 import yaml
-from behave.model import given
+from behave import given
 from behave.runner import Context
 
 
