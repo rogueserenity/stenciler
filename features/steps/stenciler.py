@@ -4,7 +4,7 @@ import subprocess
 from queue import Queue, Empty
 from threading import Thread
 
-from behave import when
+from behave.model import when
 from behave.runner import Context
 
 

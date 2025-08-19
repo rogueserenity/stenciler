@@ -1,6 +1,6 @@
 import os
 
-from behave import given, then
+from behave.model import given, then
 from behave.runner import Context
 
 
