@@ -11,7 +11,7 @@ require (
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/iancoleman/strcase v0.3.0
 	github.com/spf13/cobra v1.9.1
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
