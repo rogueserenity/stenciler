@@ -1,13 +1,11 @@
 module github.com/rogueserenity/stenciler
 
-go 1.23.0
-
-toolchain go1.23.6
+go 1.24.0
 
 require (
 	github.com/bmatcuk/doublestar/v4 v4.9.1
 	github.com/carlmjohnson/versioninfo v0.22.5
-	github.com/go-faker/faker/v4 v4.6.1
+	github.com/go-faker/faker/v4 v4.6.2
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/iancoleman/strcase v0.3.0
 	github.com/spf13/cobra v1.10.1
@@ -39,6 +37,6 @@ require (
 	golang.org/x/crypto v0.37.0 // indirect
 	golang.org/x/net v0.39.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
-	golang.org/x/text v0.25.0 // indirect
+	golang.org/x/text v0.29.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
