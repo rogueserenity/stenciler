@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Conventional Commit In Pull Requests
-        uses: ytanikin/pr-conventional-commits@b727582
+        uses: ytanikin/pr-conventional-commits@b72758283dcbee706975950e96bc4bf323a8d8c0
         with:
           task_types: '["feat","fix","docs","test","ci","refactor","perf","chore","revert"]'
           add_label: "false"
