@@ -7,7 +7,7 @@ toolchain go1.24.7
 require (
 	github.com/bmatcuk/doublestar/v4 v4.9.1
 	github.com/carlmjohnson/versioninfo v0.22.5
-	github.com/go-faker/faker/v4 v4.6.2
+	github.com/go-faker/faker/v4 v4.7.0
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/iancoleman/strcase v0.3.0
 	github.com/spf13/cobra v1.10.1
