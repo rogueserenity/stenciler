@@ -97,9 +97,18 @@ jobs:
 
       - run: poetry install
 
+      - name: generate app token
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_PLZ_APP_ID }}
+          private-key: ${{ secrets.RELEASE_PLZ_APP_PRIVATE_KEY }}
+          repositories: stenciler-tests-private
+          permission-contents: read
+
       - name: functional test
         env:
-          TEST_REPO_TOKEN: ${{ secrets.TEST_REPO_TOKEN }}
+          TEST_REPO_TOKEN: ${{ steps.app-token.outputs.token }}
         run: poetry run behave -t ~@ssh
 
   release:
@@ -116,7 +125,16 @@ jobs:
         with:
           fetch-tags: true
 
+      - name: generate app token
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        id: app-token
+        with:
+          app-id: ${{ secrets.RELEASE_PLZ_APP_ID }}
+          private-key: ${{ secrets.RELEASE_PLZ_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
       - name: semantic-release
         uses: ahmadnassri/action-semantic-release@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.STENCILER_RELEASE_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
