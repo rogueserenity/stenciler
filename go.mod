@@ -5,7 +5,7 @@ go 1.26.0
 require (
 	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/carlmjohnson/versioninfo v0.22.5
-	github.com/go-faker/faker/v4 v4.10.0
+	github.com/go-faker/faker/v4 v4.10.1
 	github.com/go-git/go-git/v5 v5.19.1
 	github.com/iancoleman/strcase v0.3.0
 	github.com/spf13/cobra v1.10.2
@@ -38,6 +38,6 @@ require (
 	golang.org/x/crypto v0.52.0 // indirect
 	golang.org/x/net v0.55.0 // indirect
 	golang.org/x/sys v0.45.0 // indirect
-	golang.org/x/text v0.37.0 // indirect
+	golang.org/x/text v0.40.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
