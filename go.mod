@@ -3,7 +3,7 @@ module github.com/rogueserenity/stenciler
 go 1.26.0
 
 require (
-	github.com/bmatcuk/doublestar/v4 v4.10.0
+	github.com/bmatcuk/doublestar/v4 v4.10.2
 	github.com/carlmjohnson/versioninfo v0.22.5
 	github.com/go-faker/faker/v4 v4.12.0
 	github.com/go-git/go-git/v5 v5.19.2
